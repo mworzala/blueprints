@@ -57,6 +57,9 @@ Window::Window(const char* title, int initial_width, int initial_height,
 }
 
 Window::~Window() {
+    for (auto editor : m_editors)
+        delete editor;
+
     glfwTerminate();
 }
 
@@ -82,6 +85,9 @@ void Window::onFramebufferResize(int new_width, int new_height) {
     glViewport(0, 0, new_width, new_height);
     m_width = static_cast<float>(new_width);
     m_height = static_cast<float>(new_height);
+
+    for (auto editor : m_editors)
+        editor->resize(m_width, m_height);
 }
 
 void Window::onKeyPress(int key, int scancode, int action, int mods) {
@@ -98,4 +104,11 @@ void Window::onMouseMove(float x, float y) {
 
 void Window::onMouseScroll(float dx, float dy) {
     (*m_mouse_scroll_callback)(nullptr, dx, dy);
+}
+
+Editor* Window::addEditor() {
+    auto editor = new Editor(1.0f, 2.0f);
+
+    m_editors.push_back(editor);
+    return editor;
 }

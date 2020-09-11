@@ -15,8 +15,6 @@ private:
 public:
     Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
 
-    unsigned int getId() const;
-
     void use() const;
 
     void setBool(const std::string& name, bool value) const;

@@ -1,4 +1,4 @@
-#include "shader.h"
+#include "Shader.h"
 
 Shader::Shader(const char *vertexPath, const char *fragmentPath, const char *geometryPath) {
 
@@ -121,9 +121,3 @@ void Shader::setMat4(const std::string &name, glm::mat4 value) const {
 void Shader::del() const {
     glDeleteShader(m_id);
 }
-
-unsigned int Shader::getId() const {
-    return m_id;
-}
-
-

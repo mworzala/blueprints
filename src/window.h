@@ -1,15 +1,20 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include "editor.h"
 
 class Window {
 private:
     GLFWwindow *m_window;
     float m_width;
     float m_height;
+
+    std::vector<Editor*> m_editors{};
 
     // TEMP
     GLFWkeyfun m_key_callback;
@@ -28,6 +33,8 @@ public:
     [[nodiscard]] bool shouldClose() const;
 
     void swapBuffers();
+
+    Editor* addEditor();
 
 private:
     void onFramebufferResize(int new_width, int new_height);

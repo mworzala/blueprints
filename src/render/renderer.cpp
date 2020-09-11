@@ -1,61 +1,30 @@
 #include "renderer.h"
 
 Renderer::Renderer()
-    : m_shader(Shader("../src/shader/basic_vertex.glsl", "../src/shader/basic_fragment.glsl")) {
-    init();
+    : m_shader("../src/shader/basic_vertex.glsl", "../src/shader/basic_fragment.glsl"),
+    fontUbuntu(fontRenderer.loadFont("../fonts/ubuntu.ttf")) {
 }
 
-Renderer::~Renderer() {
-    glDeleteVertexArrays(1, &m_quadVao);
+Renderer::~Renderer() = default;
+
+void Renderer::drawQuad(float x, float y, glm::vec2 size) {
+    quadRenderer.renderQuad(x, y, size);
 }
 
-void Renderer::init() {
-    unsigned int vbo;
-    float vertices[] = {
-            0.0f, 1.0f,
-            1.0f, 0.0f,
-            0.0f, 0.0f,
-            0.0f, 1.0f,
-            1.0f, 1.0f,
-            1.0f, 0.0f,
-    };
-
-    glGenVertexArrays(1, &m_quadVao);
-    glGenBuffers(1, &vbo);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindVertexArray(m_quadVao);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*) nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+void Renderer::drawText(const std::string &text, float x, float y, float scale, glm::vec3 color) {
+    fontRenderer.renderText(fontUbuntu, text, x, y, scale, color);
 }
 
-void Renderer::drawQuad(glm::vec2 position, glm::vec2 size) {
+void Renderer::preRender(glm::mat4 projection, glm::mat4 view) {
     m_shader.use();
+    m_shader.setMat4("projection", projection);
+    m_shader.setMat4("view", view);
 
-    glm::mat4 model = glm::mat4(1.0f);
-    // Translation
-    model = glm::translate(model, glm::vec3(position, 0.0f));
-
-    // Rotation
-//    model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f));
-//    model = glm::rotate(model, glm::radians(rotate), glm::vec3(0.0f, 0.0f, 1.0f));
-//    model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f));
-
-    // Scale
-    model = glm::scale(model, glm::vec3(size, 1.0f));
-
-    m_shader.setMat4("model", model);
-
-    glBindVertexArray(m_quadVao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
+    fontRenderer.preRender(projection, view);
+    testRenderer.preRender(projection, view);
+    quadRenderer.preRender(projection, view);
 }
 
-Shader *Renderer::getShader() {
-    return &m_shader;
+void Renderer::drawTest() {
+    testRenderer.render();
 }
