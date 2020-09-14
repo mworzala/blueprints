@@ -19,11 +19,16 @@ private:
 
     QuadRenderer quadRenderer{};
 
+    float m_originX = 0.0f, m_originY = 0.0f;
+
 public:
     Renderer();
     ~Renderer();
 
     void preRender(glm::mat4 projection, glm::mat4 view);
+
+    void setOrigin(float x, float y);
+    void addOrigin(float x, float y);
 
     void drawQuad(float x, float y, glm::vec2 size = glm::vec2(1000, 1000));
     void drawText(const std::string& text, float x, float y, float scale, glm::vec3 color);

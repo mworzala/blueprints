@@ -1,6 +1,8 @@
 #pragma once
 
-#include "window.h"
+#include <iostream>
+
+#include "WindowEventReceiver.h"
 
 struct Viewport {
     float width;
@@ -13,10 +15,8 @@ struct Viewport {
  * An Editor represents a window in which nodes are editing.
  * It should be able to take up an arbitrary amount of space.
  */
-class Editor {
+class Editor : public WindowEventReceiver {
 private:
-    Window *m_window;
-
     float m_width;
     float m_height;
 
@@ -26,6 +26,8 @@ public:
     explicit Editor(float width, float height);
 
     void resize(float new_width, float new_height);
+
+    void onMouseButton(int button, int action, int mods) override;
 };
 
 

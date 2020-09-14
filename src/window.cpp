@@ -44,7 +44,7 @@ Window::Window(const char* title, int initial_width, int initial_height,
         static_cast<Window*>(glfwGetWindowUserPointer(window))->onKeyPress(key, scancode, action, mods);
     });
     glfwSetMouseButtonCallback(m_window, [](GLFWwindow *window, int button, int action, int mods) {
-        static_cast<Window*>(glfwGetWindowUserPointer(window))->onMouseButton(button, action, mods);
+        static_cast<Window*>(glfwGetWindowUserPointer(window))->_onMouseButton(button, action, mods);
     });
     glfwSetCursorPosCallback(m_window, [](GLFWwindow *window, double x, double y) {
         static_cast<Window*>(glfwGetWindowUserPointer(window))->
@@ -106,9 +106,8 @@ void Window::onMouseScroll(float dx, float dy) {
     (*m_mouse_scroll_callback)(nullptr, dx, dy);
 }
 
-Editor* Window::addEditor() {
-    auto editor = new Editor(1.0f, 2.0f);
-
+Editor* Window::addEditor(Editor* editor) {
+    WindowEventReceiver::addChild(editor);
     m_editors.push_back(editor);
     return editor;
 }

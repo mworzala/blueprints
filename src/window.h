@@ -7,8 +7,9 @@
 #include <GLFW/glfw3.h>
 
 #include "editor.h"
+#include "WindowEventReceiver.h"
 
-class Window {
+class Window : public WindowEventReceiver {
 private:
     GLFWwindow *m_window;
     float m_width;
@@ -34,14 +35,14 @@ public:
 
     void swapBuffers();
 
-    Editor* addEditor();
+    Editor* addEditor(Editor* editor);
 
 private:
-    void onFramebufferResize(int new_width, int new_height);
-    void onKeyPress(int key, int scancode, int action, int mods);
-    void onMouseButton(int button, int action, int mods);
-    void onMouseMove(float x, float y);
-    void onMouseScroll(float dx, float dy);
+    void onFramebufferResize(int new_width, int new_height) override;
+    void onKeyPress(int key, int scancode, int action, int mods) override;
+    void onMouseButton(int button, int action, int mods) override;
+    void onMouseMove(float x, float y) override;
+    void onMouseScroll(float dx, float dy) override;
 };
 
 

@@ -10,6 +10,9 @@
 
 #include "window.h"
 #include "render/renderer.h"
+#include "event/ApplicationEvent.h"
+#include "component/HBox.h"
+#include "component/StaticRectangle.h"
 
 //todo glfwCharCallback is used for typing in text boxes
 
@@ -90,8 +93,65 @@ void mouse_scroll_callback(GLFWwindow *w, double dx, double dy) {
 Window window("Blueprint Editor (that doesnt do anything)", 2000, 2000,
               key_callback, mouse_button_callback, mouse_pos_callback, mouse_scroll_callback);
 
+Editor* editor = new Editor(2000, 2000);
+
+class Test {
+private:
+    const char* m_name = "TestEventHandler";
+
+public:
+    explicit Test(EventBus* eventBus) {
+        eventBus->subscribe(EventType::WindowClose, EVENT_HANDLER(HandleEvent));
+    }
+
+    void HandleEvent(Event* event) {
+        std::cout << m_name << " <> " << event->toString() << std::endl;
+    }
+};
+
 int main() {
+
+    HBox hbox(10.0f);
+    StaticRectangle rect1(50.0f, 20.0f);
+    StaticRectangle rect2(10.0f, 100.0f);
+
+    HBox hbox2(5.0f);
+    StaticRectangle rect3(10.0f, 10.0f);
+    StaticRectangle rect4(30.0f, 50.0f);
+
+
+    hbox.addChild(&rect1);
+    hbox.addChild(&rect2);
+    hbox.addChild(&hbox2);
+    std::cout << "Hi" << std::endl;
+    hbox2.addChild(&rect3);
+    hbox2.addChild(&rect4);
+
+
+
+
+
+
+//    auto eventBus = new EventBus();
+//    Test test(eventBus);
+//
+//    WindowCloseEvent testEvent;
+//    eventBus->dispatch(&testEvent);
+
+
+
+
+
+
+
+
+
+
+
+
     Renderer renderer;
+
+    window.addEditor(editor);
 
     while (!window.shouldClose()) {
         glClearColor(0.19f, 0.19f, 0.19f, 1.0f);
@@ -108,8 +168,12 @@ int main() {
         renderer.preRender(proj, view);
 
         // Coordinate System Test
-        renderer.drawQuad(100.0f, 100.0f);
-        renderer.drawText("This should be on top!", 100.0f, 100.0f, FONT_SIZE_SMALL, glm::vec3(0.5, 0.8f, 0.2f));
+//        renderer.drawQuad(100.0f, 100.0f);
+//        renderer.drawText("This should be on top!", 100.0f, 100.0f, FONT_SIZE_SMALL, glm::vec3(0.5, 0.8f, 0.2f));
+
+        hbox.layout();
+        hbox.render(&renderer);
+//        rect1.render(&renderer);
 
         // Quad Rendering
 //        renderer.drawQuad(glm::vec2(500.0, 500.0), glm::vec2(1000.0, 1000.0));
@@ -123,6 +187,8 @@ int main() {
 
         window.swapBuffers();
     }
+
+    delete editor;
 
     glfwTerminate();
     return 0;
