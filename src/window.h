@@ -16,6 +16,7 @@ private:
     float m_height;
 
     std::vector<Editor*> m_editors{};
+    Editor* m_activeEditor = nullptr;
 
     // TEMP
     GLFWkeyfun m_key_callback;
@@ -32,6 +33,9 @@ public:
     [[nodiscard]] float getWidth() const;
     [[nodiscard]] float getHeight() const;
     [[nodiscard]] bool shouldClose() const;
+    GLFWwindow* getGlfwWindow() const {
+        return m_window;
+    }
 
     void swapBuffers();
 

@@ -1,8 +1,11 @@
+
+//#include "../vendor/imgui/include/imgui.h"
+
 #include "editor.h"
 
 Editor::Editor(float width, float height)
     : m_width(width), m_height(height) {
-    m_viewport = {
+    viewport = {
             .width = width,
             .height = height,
             .x = 0.0f,
@@ -10,10 +13,18 @@ Editor::Editor(float width, float height)
     };
 }
 
+void Editor::render() {
+
+}
+
 void Editor::resize(float new_width, float new_height) {
 
 }
 
 void Editor::onMouseButton(int button, int action, int mods) {
-    std::cout << "Hi" << std::endl;
+    WindowEventReceiver::onMouseButton(button, action, mods);
+}
+
+void Editor::onImGuiRender() {
+
 }

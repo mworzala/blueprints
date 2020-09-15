@@ -30,7 +30,7 @@ public:
     void setOrigin(float x, float y);
     void addOrigin(float x, float y);
 
-    void drawQuad(float x, float y, glm::vec2 size = glm::vec2(1000, 1000));
+    void drawQuad(float x, float y, glm::vec2 size = glm::vec2(1000, 1000), glm::vec4 color = glm::vec4(1.0, 1.0, 1.0, 1.0));
     void drawText(const std::string& text, float x, float y, float scale, glm::vec3 color);
     void drawTest();
 };

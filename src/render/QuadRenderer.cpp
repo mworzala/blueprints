@@ -1,7 +1,7 @@
 #include "QuadRenderer.h"
 
 QuadRenderer::QuadRenderer()
-    : m_shader("../src/shader/basic_vertex.glsl", "../src/shader/basic_fragment.glsl"){
+    : m_shader("../resources/shader/basic_vertex.glsl", "../resources/shader/basic_fragment.glsl"){
 
     float vertices[] = {
             0.0f, 1.0f,
@@ -37,8 +37,9 @@ void QuadRenderer::preRender(glm::mat4 projection, glm::mat4 view) {
     m_shader.setMat4("view", view);
 }
 
-void QuadRenderer::renderQuad(float x, float y, glm::vec2 size) {
+void QuadRenderer::renderQuad(float x, float y, glm::vec2 size, glm::vec4 color) {
     m_shader.use();
+    m_shader.setVec4("color", color);
 
     glm::mat4 model = glm::mat4(1.0f);
     // Translation

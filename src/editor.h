@@ -1,5 +1,6 @@
 #pragma once
 
+#include <tuple>
 #include <iostream>
 
 #include "WindowEventReceiver.h"
@@ -20,14 +21,26 @@ private:
     float m_width;
     float m_height;
 
-    Viewport m_viewport{};
-
 public:
+    Viewport viewport{};
+
     explicit Editor(float width, float height);
 
     void resize(float new_width, float new_height);
 
     void onMouseButton(int button, int action, int mods) override;
+
+    void render();
+
+    void onImGuiRender();
+
+    std::tuple<float, float> toCanvasSpace(float x, float y) const {
+        float scale = viewport.width / m_width;
+        return { viewport.x + (x * scale),  viewport.y + (m_height - y) * scale };
+    }
+
+    // Render steps
+
 };
 
 

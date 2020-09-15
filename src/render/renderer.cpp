@@ -2,13 +2,13 @@
 
 Renderer::Renderer()
     : m_shader("../src/shader/basic_vertex.glsl", "../src/shader/basic_fragment.glsl"),
-    fontUbuntu(fontRenderer.loadFont("../fonts/ubuntu.ttf")) {
+    fontUbuntu(fontRenderer.loadFont("../resources/font/ubuntu.ttf")) {
 }
 
 Renderer::~Renderer() = default;
 
-void Renderer::drawQuad(float x, float y, glm::vec2 size) {
-    quadRenderer.renderQuad(x + m_originX, y + m_originY, size);
+void Renderer::drawQuad(float x, float y, glm::vec2 size, glm::vec4 color) {
+    quadRenderer.renderQuad(x + m_originX, y + m_originY, size, color);
 }
 
 void Renderer::drawText(const std::string &text, float x, float y, float scale, glm::vec3 color) {

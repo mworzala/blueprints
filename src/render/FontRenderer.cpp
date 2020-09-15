@@ -1,7 +1,7 @@
 #include "FontRenderer.h"
 
 FontRenderer::FontRenderer()
-        : m_shader("../src/shader/font.vert", "../src/shader/font.frag") {
+        : m_shader("../resources/shader/font.vert", "../resources/shader/font.frag") {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 

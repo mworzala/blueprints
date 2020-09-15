@@ -80,7 +80,6 @@ void Window::swapBuffers() {
     glfwPollEvents();
 }
 
-
 void Window::onFramebufferResize(int new_width, int new_height) {
     glViewport(0, 0, new_width, new_height);
     m_width = static_cast<float>(new_width);
@@ -107,6 +106,7 @@ void Window::onMouseScroll(float dx, float dy) {
 }
 
 Editor* Window::addEditor(Editor* editor) {
+    m_activeEditor = editor;
     WindowEventReceiver::addChild(editor);
     m_editors.push_back(editor);
     return editor;

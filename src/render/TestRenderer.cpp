@@ -1,7 +1,7 @@
 #include "TestRenderer.h"
 
 TestRenderer::TestRenderer()
-    : m_shader("../src/shader/geometry_test.vert", "../src/shader/geometry_test.frag", "../src/shader/geometry_test.geom"){
+    : m_shader("../resources/shader/geometry_test.vert", "../resources/shader/geometry_test.frag", "../resources/shader/geometry_test.geom"){
 
     float vertices[] = {
             -0.5f, 0.5f,
