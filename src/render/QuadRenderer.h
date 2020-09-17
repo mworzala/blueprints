@@ -3,13 +3,13 @@
 #include <glm/glm.hpp>
 
 #include "opengl/Shader.h"
+#include "opengl/VertexArray.h"
 
 class QuadRenderer {
 private:
     Shader m_shader;
 
-    unsigned int m_vbo{};
-    unsigned int m_vao{};
+    VertexArray m_vao{};
 
 public:
     QuadRenderer();
