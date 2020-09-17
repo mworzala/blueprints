@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#include "syling.h"
+#include "style.h"
 #include "../render/renderer.h"
 
 /**

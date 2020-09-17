@@ -3,15 +3,13 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "Shader.h"
+#include "opengl/Shader.h"
 #include "FontRenderer.h"
 #include "TestRenderer.h"
 #include "QuadRenderer.h"
 
 class Renderer {
 private:
-    Shader m_shader;
-
     FontRenderer fontRenderer{};
     int* fontUbuntu;
 

@@ -8,7 +8,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include "Shader.h"
+#include "opengl/Shader.h"
 
 struct FreetypeChar {
     unsigned int textureId;

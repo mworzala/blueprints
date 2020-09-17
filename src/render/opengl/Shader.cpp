@@ -1,6 +1,7 @@
 #include "Shader.h"
 
 Shader::Shader(const char *vertexPath, const char *fragmentPath, const char *geometryPath) {
+//    std::cout << "Loading " << vertexPath << std::endl;
 
     // Reading vertex and fragment shaders.
     std::string vertexSource, fragmentSource, geometrySource;

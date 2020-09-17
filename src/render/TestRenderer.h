@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Shader.h"
+#include "opengl/Shader.h"
 
 class TestRenderer {
 private:
