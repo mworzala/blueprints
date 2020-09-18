@@ -75,7 +75,7 @@ int Renderer::GetDrawCalls() {
     return m_drawCalls;
 }
 
-void Renderer::DrawText(const std::string &text, float x, float y, float size, glm::vec4 color) {
+void Renderer::DrawText(const std::string &text, float x, float y, float size, glm::vec4 color) { //todo this does not respect origin movement
     auto characters = *FontHelper::GetFont("ubuntu");
 
     // Setup
@@ -125,7 +125,19 @@ void Renderer::DrawText(const std::string &text, float x, float y, float size, g
 }
 
 std::tuple<float, float> Renderer::CalculateTextSize(const std::string &text, float size) {
-    return std::tuple<float, float>();
+    auto characters = *FontHelper::GetFont("ubuntu");
+
+    float width = 0;
+    float height = 0;
+
+    std::string::const_iterator c;
+    for (c = text.begin(); c != text.end(); c++) {
+        FTChar ch = characters[*c];
+        width += (float) (ch.advance >> 6) * size;
+        height = std::max(height, (float) ch.bearing.y * size); //todo need to account for the characters below baseline. I think the answer is to add required padding?
+    }
+
+    return std::tuple<float, float>(width / 5, height / 5);
 }
 
 void Renderer::InitQuadRenderer() {

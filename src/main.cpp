@@ -20,6 +20,7 @@
 #include "event/ApplicationEvent.h"
 #include "component/HBox.h"
 #include "component/StaticRectangle.h"
+#include "component/Text.h"
 
 #include "render/Renderer.h"
 
@@ -135,6 +136,8 @@ Window window("Blueprint Editor (that doesnt do anything)", 2000, 2000,
 StaticRectangle rect7(30.0f, 50.0f, RGB(0.2, 0.1, 0.4));
 
 int main() {
+
+    Renderer::Init();
     hbox.setBackground(RGB(1.0, 0.9, 0.8));
     StaticRectangle rect1(50.0f, 20.0f, RGB(0.9, 0.9, 0.5));
     StaticRectangle rect2(10.0f, 100.0f, RGB(0.6, 0.8, 0.1));
@@ -177,6 +180,8 @@ int main() {
 
     StaticRectangle a(100, 100, RGB(0.7, 0.1, 0.4));
 
+    Text t("Hello, World");
+    t.setBackground(RGB(0.6, 0.7, 0.8));
 
 
 
@@ -234,8 +239,6 @@ int main() {
 
     glfwSwapInterval(1);
 
-    Renderer::Init();
-
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -262,13 +265,12 @@ int main() {
         hbox.setBackground(outerHboxColor);
         hbox.layout();
 //        hbox.render();
-
-        a.render();
+//        a.render();
+        t.render();
 
         for (auto* thing : stuffToRender)
             thing->render();
 
-        Renderer::DrawText("Hello, World", 0, 0, 0.5, RGB(1, 1, 1));
 
         // ImGui
         ImGui_ImplOpenGL3_NewFrame();
