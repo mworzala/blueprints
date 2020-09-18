@@ -19,8 +19,8 @@ public:
         return m_height + m_margin.bottom + m_margin.top;
     }
 
-    void render(Renderer *renderer) override {
-        renderer->drawQuad((getX() + m_margin.left) * 10, (getY() + m_margin.bottom) * 10, glm::vec2(10 * m_width, 10 * m_height), m_background);
+    void render() override {
+        Renderer::DrawQuad(getX() + m_margin.left, getY() + m_margin.bottom, m_width, m_height, m_background);
     }
 };
 

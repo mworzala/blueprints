@@ -25,9 +25,19 @@ VertexType VertexBuffer::getType() const {
     return m_type;
 }
 
+void VertexBuffer::setDynamic(unsigned int size) {
+    bind();
+    glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+    m_dynamic = true;
+    unbind();
+}
+
 void VertexBuffer::setData(const void *data, unsigned int size) const {
     bind();
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+    if (m_dynamic)
+        glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+    else
+        glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
     unbind();
 }
 
@@ -38,6 +48,10 @@ std::tuple<unsigned int, unsigned long> VertexBuffer::getGlType(VertexType type)
         default:
             throw; //todo different exception here.
     }
+}
+
+unsigned int VertexBuffer::GlId(VertexBuffer *buffer) {
+    return buffer->m_id;
 }
 
 

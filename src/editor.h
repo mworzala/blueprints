@@ -36,7 +36,7 @@ public:
 
     std::tuple<float, float> toCanvasSpace(float x, float y) const {
         float scale = viewport.width / m_width;
-        return { viewport.x + (x * scale),  viewport.y + (m_height - y) * scale };
+        return { (viewport.x + (x * scale)) / 5,  (viewport.y + (m_height - y) * scale) / 5 };
     }
 
     // Render steps

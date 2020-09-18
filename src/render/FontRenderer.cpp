@@ -2,7 +2,7 @@
 
 FontRenderer::FontRenderer()
         : m_shader("../resources/shader/font.vert", "../resources/shader/font.frag") {
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 }
 
 FontRenderer::~FontRenderer() {
@@ -99,7 +99,6 @@ Shader *FontRenderer::getShader() {
 
 void FontRenderer::renderText(const int *font, const std::string &text, float x, float y, float scale, glm::vec3 color) {
     glEnable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
 
     auto characters = *((std::map<char, FreetypeChar> *) font);
 
@@ -146,7 +145,6 @@ void FontRenderer::renderText(const int *font, const std::string &text, float x,
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glDisable(GL_CULL_FACE);
-    glDisable(GL_BLEND);
 }
 
 void FontRenderer::preRender(glm::mat4 projection, glm::mat4 view) {

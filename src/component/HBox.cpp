@@ -7,7 +7,7 @@ void HBox::layout() {
     float x = m_padding.left, maxHeight = 0.0f;
     for (auto child : m_children) {
         x += maxHeight == 0 ? 0 : m_spacing;
-        child->setX(getX() + x);
+        child->setX(x);
         child->setY(m_padding.bottom);
         child->layout();
         x += child->getWidth();
@@ -28,10 +28,10 @@ float HBox::getHeight() const {
     return m_height;
 }
 
-void HBox::render(Renderer *renderer) {
-    renderer->drawQuad(getX() * 10, getY() * 10, glm::vec2(10 * m_width, 10 * m_height), m_background);
+void HBox::render() {
+    Renderer::DrawQuad(getX(), getY(), m_width, m_height, m_background);
 
-    for (auto child : m_children) {
-        child->render(renderer);
-    }
+    auto _ = Renderer::MoveOrigin(getX(), getY());
+    for (auto child : m_children)
+        child->render();
 }

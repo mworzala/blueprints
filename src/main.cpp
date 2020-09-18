@@ -17,10 +17,11 @@
 #include FT_FREETYPE_H
 
 #include "window.h"
-#include "render/renderer.h"
 #include "event/ApplicationEvent.h"
 #include "component/HBox.h"
 #include "component/StaticRectangle.h"
+
+#include "render/Renderer.h"
 
 //todo glfwCharCallback is used for typing in text boxes
 
@@ -28,6 +29,7 @@ int win_width = 2000.0f;
 int win_height = 2000.0f;
 
 Editor* editor = new Editor(2000, 2000);
+HBox hbox(10.0f);
 
 void key_callback(GLFWwindow *w, int key, int scancode, int action, int mods) {
     if (ImGui::GetIO().WantCaptureKeyboard)
@@ -62,12 +64,15 @@ void mouse_button_callback(GLFWwindow *w, int button, int action, int mods) {
         auto [x, y] = editor->toCanvasSpace(mouse_x, mouse_y);
 //        std::cout << "Click: (" << x << " " << y << ")" << std::endl;
 
-        for (int i = 0; i < 1000; i++) {
-            auto* rect = new StaticRectangle(10.0f, 10.0f, RGB(0.3, 0.4, 0.6));
-            rect->setX(x / 10 - 5);
-            rect->setY(y / 10 - 5);
-            stuffToRender.push_back(rect);
-        }
+    if (hbox.contains(x, y))
+        hbox.handleClick(x - hbox.getX(), y - hbox.getY());
+
+//        for (int i = 0; i < 1000; i++) {
+//            auto* rect = new StaticRectangle(10.0f, 10.0f, RGB(0.3, 0.4, 0.6));
+//            rect->setX(x / 10 - 5);
+//            rect->setY(y / 10 - 5);
+//            stuffToRender.push_back(rect);
+//        }
     }
 }
 
@@ -127,9 +132,9 @@ public:
 Window window("Blueprint Editor (that doesnt do anything)", 2000, 2000,
               key_callback, mouse_button_callback, mouse_pos_callback, mouse_scroll_callback);
 
-int main() {
+StaticRectangle rect7(30.0f, 50.0f, RGB(0.2, 0.1, 0.4));
 
-    HBox hbox(10.0f);
+int main() {
     hbox.setBackground(RGB(1.0, 0.9, 0.8));
     StaticRectangle rect1(50.0f, 20.0f, RGB(0.9, 0.9, 0.5));
     StaticRectangle rect2(10.0f, 100.0f, RGB(0.6, 0.8, 0.1));
@@ -148,7 +153,56 @@ int main() {
     hbox2.addChild(&rect3);
     hbox2.addChild(&rect4);
 
+//    hbox.setBackground(RGB(1.0, 0.9, 0.8));
+//    StaticRectangle rect4(30.0f, 50.0f, RGB(0.7, 0.1, 0.4));
+//    rect4.setMargin(5.0f);
+//    hbox.addChild(&rect4);
+//    StaticRectangle rect5(30.0f, 50.0f, RGB(0.7, 0.1, 0.4));
+//    rect5.setMargin(5.0f);
+//    hbox.addChild(&rect5);
+//
+//    HBox hboxAlt(6.9);
+//    hboxAlt.setBackground(RGB(0.2, 0.5, 0.8));
+//    StaticRectangle rect6(30.0f, 50.0f, RGB(0.2, 0.1, 0.4));
+//    rect6.setMargin(5.0f);
+//    hboxAlt.addChild(&rect6);
+//
+//    HBox hboxAlt2(6.9);
+//    hboxAlt2.setBackground(RGB(0.2, 0.5, 0.8));
+//    rect7.setMargin(5.0f);
+//    hboxAlt2.addChild(&rect7);
+//
+//    hbox.addChild(&hboxAlt);
+//    hbox.addChild(&hboxAlt2);
 
+    StaticRectangle a(100, 100, RGB(0.7, 0.1, 0.4));
+
+
+
+
+//    hbox.setOnClick([](float x, float y) {
+//        std::cout << "Clicked on HBox!" << std::endl;
+//    });
+//    hboxAlt.setOnClick([](float x, float y) {
+//        std::cout << "Clicked on HBoxAlt!" << std::endl;
+//    });
+//    hboxAlt2.setOnClick([](float x, float y) {
+//        std::cout << "Clicked on HBoxAlt!" << std::endl;
+//    });
+//
+//    rect4.setOnClick([](float x, float y) {
+//        std::cout << "Clicked on rect 4!" << std::endl;
+//    });
+//    rect5.setOnClick([](float x, float y) {
+//        std::cout << "Clicked on rect 5!" << std::endl;
+//    });
+//    rect6.setOnClick([](float x, float y) {
+//        std::cout << "Clicked on rect 6!" << std::endl;
+//    });
+//    rect7.setOnClick([](float x, float y) {
+//        std::cout << "Clicked on rect 6!" << std::endl;
+//        rect7.setBackground(RGB(0.4, 0.7, 0.2));
+//    });
 
 
 
@@ -157,19 +211,6 @@ int main() {
 //
 //    WindowCloseEvent testEvent;
 //    eventBus->dispatch(&testEvent);
-
-
-
-
-
-
-
-
-
-
-
-
-    Renderer renderer;
 
     window.addEditor(editor);
 
@@ -187,14 +228,16 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window.getGlfwWindow(), true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    bool show_demo_window = false;
-    bool show_another_window = false;
     glm::vec4 outerHboxColor(0.2f, 0.3f, 0.8f, 1.0f);
-
 
     auto last_time = std::chrono::steady_clock::now();
 
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
+
+    Renderer::Init();
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     while (!window.shouldClose()) {
         auto now_time = std::chrono::steady_clock::now();
@@ -214,30 +257,18 @@ int main() {
         glm::mat4 proj;
         proj = glm::ortho(0.0f, editor->viewport.width, 0.0f, editor->viewport.height, 0.0f, 100.0f);
 
-        renderer.preRender(proj, view);
-
-        // Coordinate System Test
-//        renderer.drawQuad(100.0f, 100.0f);
-//        renderer.drawText("This should be on top!", 100.0f, 100.0f, FONT_SIZE_SMALL, glm::vec3(0.5, 0.8f, 0.2f));
-
-
+        Renderer::NewFrame(proj, view);
 
         hbox.setBackground(outerHboxColor);
         hbox.layout();
-        hbox.render(&renderer);
+//        hbox.render();
+
+        a.render();
 
         for (auto* thing : stuffToRender)
-            thing->render(&renderer);
-//        rect1.render(&renderer);
+            thing->render();
 
-        // Quad Rendering
-//        renderer.drawQuad(glm::vec2(500.0, 500.0), glm::vec2(1000.0, 1000.0));
-
-        // Font Rendering
-//        renderer.drawText("Bad", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
-
-        // Test Renderer (Geometry Testing)
-//        renderer.drawTest();
+        Renderer::DrawText("Hello, World", 0, 0, 0.5, RGB(1, 1, 1));
 
         // ImGui
         ImGui_ImplOpenGL3_NewFrame();
@@ -253,6 +284,7 @@ int main() {
             ImGui::Text("Because it is a big mess :(");
 
             ImGui::ColorEdit4("Outer BG Color", glm::value_ptr(outerHboxColor));
+
             ImGui::End();
 
         }
@@ -260,10 +292,10 @@ int main() {
 //        ImGui::ShowDemoWindow();
 
         {
-            ImGui::Begin("Debug Stuff");
+            ImGui::Begin("Debug");
 
             ImGui::Text("FPS: %.1f", fps);
-            ImGui::Text("Object Count: %zu", stuffToRender.size());
+            ImGui::Text("Draw Calls: %d", Renderer::GetDrawCalls());
 
             if (ImGui::Button("Clear")) {
                 for (auto* thing : stuffToRender)

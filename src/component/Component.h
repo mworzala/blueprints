@@ -3,7 +3,9 @@
 #include <glm/glm.hpp>
 
 #include "style.h"
-#include "../render/renderer.h"
+#include "../render/Renderer.h"
+
+typedef void (*ClickCallback)(float x, float y);
 
 /**
  * Represents a component in an Editor.
@@ -12,6 +14,8 @@ class Component {
 private:
     // The x and y location of this component relative to it's parent's origin.
     float m_x, m_y;
+
+    ClickCallback m_onClick = nullptr;
 
 protected:
     Box m_padding;
@@ -35,10 +39,18 @@ public:
 
     virtual void layout() {};
 
-    virtual void render(Renderer *renderer) = 0;
+    virtual void render() = 0;
 
     // Events
-    virtual void onClick(float x, float y) {}
+    void setOnClick(ClickCallback onClick) { m_onClick = onClick; }
+    virtual void handleClick(float x, float y) {
+        if (m_onClick == nullptr) return;
+
+//        if (x < m_margin.left) return;
+//        if (x > m_margin.left + m_x) return;
+        //todo padding
+        m_onClick(x - m_margin.left, y - m_margin.top);
+    }
 
     // Padding
     void setPadding(float all) {
@@ -72,5 +84,14 @@ public:
         m_margin.left = left;
         m_margin.bottom = bottom;
         m_margin.right = right;
+    }
+
+    // Util
+    bool contains(float x, float y) const {
+        float a = m_x - x;
+        float b = x - (m_x + getWidth());
+        float c = m_y - y;
+        float d = y - (m_y + getHeight());
+        return a < 0 && b < 0 && c < 0 && d < 0;
     }
 };

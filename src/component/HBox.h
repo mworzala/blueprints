@@ -14,7 +14,7 @@ public:
     float getWidth() const override;
     float getHeight() const override;
 
-    void render(Renderer *renderer) override;
+    void render() override;
 
     void layout() override;
 };

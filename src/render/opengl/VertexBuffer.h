@@ -16,6 +16,7 @@ private:
     int m_size;
     VertexType m_type;
 
+    bool m_dynamic = false;
 public:
     explicit VertexBuffer(int size = 2, VertexType type = VertexType::FLOAT);
     ~VertexBuffer();
@@ -26,7 +27,10 @@ public:
     int getSize() const;
     VertexType getType() const;
 
+    void setDynamic(unsigned int size);
     void setData(const void* data, unsigned int size) const;
+
+    static unsigned int GlId(VertexBuffer* buffer);
 
     static std::tuple<unsigned int, unsigned long> getGlType(VertexType type);
 };
