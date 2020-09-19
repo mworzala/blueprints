@@ -140,11 +140,13 @@ int main() {
     Renderer::Init();
     hbox.setBackground(RGB(1.0, 0.9, 0.8));
     StaticRectangle rect1(50.0f, 20.0f, RGB(0.9, 0.9, 0.5));
+    rect1.setMargin(10);
     StaticRectangle rect2(10.0f, 100.0f, RGB(0.6, 0.8, 0.1));
 
     HBox hbox2(5.0f);
     hbox2.setBackground(RGB(0.1, 0.2, 0.3));
     hbox2.setPadding(10.0f, 10.0f, 0.0f, 00.0f);
+    hbox2.setMargin(10);
     StaticRectangle rect3(10.0f, 10.0f, RGB(0.2, 0.4, 0.1));
     StaticRectangle rect4(30.0f, 50.0f, RGB(0.7, 0.1, 0.4));
     rect4.setMargin(5.0f);
@@ -181,6 +183,8 @@ int main() {
     StaticRectangle a(100, 100, RGB(0.7, 0.1, 0.4));
 
     Text t("Hello, World");
+    t.setPadding(10);
+    t.setMargin(10);
     t.setBackground(RGB(0.6, 0.7, 0.8));
 
 
@@ -242,6 +246,11 @@ int main() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+//    t.setX(10);
+//    t.setY(10);
+
+    hbox.addChild(&t);
+
     while (!window.shouldClose()) {
         auto now_time = std::chrono::steady_clock::now();
         std::chrono::duration<double, std::milli> delta = now_time - last_time;
@@ -264,9 +273,15 @@ int main() {
 
         hbox.setBackground(outerHboxColor);
         hbox.layout();
-//        hbox.render();
-//        a.render();
-        t.render();
+        hbox.render();
+
+//        {
+//            t.setX(100);
+//            t.setY(100);
+//            t.render();
+//        }
+
+
 
         for (auto* thing : stuffToRender)
             thing->render();

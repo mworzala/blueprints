@@ -78,9 +78,16 @@ int Renderer::GetDrawCalls() {
 void Renderer::DrawText(const std::string &text, float x, float y, float size, glm::vec4 color) { //todo this does not respect origin movement
     auto characters = *FontHelper::GetFont("ubuntu");
 
+    x *= RENDER_SCALE;
+    y *= RENDER_SCALE;
+
+    glm::mat4 model = glm::mat4(1.0);
+    model = glm::translate(model, glm::vec3(m_originX * RENDER_SCALE, m_originY * RENDER_SCALE, 0));
+
     // Setup
     m_fontShader->use();
     m_fontShader->setVec4("color", color);
+    m_fontShader->setMat4("model", model);
 
     glActiveTexture(GL_TEXTURE0);
     m_fontVao->bind();

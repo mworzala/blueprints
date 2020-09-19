@@ -21,17 +21,18 @@ void HBox::layout() {
 }
 
 float HBox::getWidth() const {
-    return m_width;
+    return m_width + m_margin.left + m_margin.right;
 }
 
 float HBox::getHeight() const {
-    return m_height;
+    return m_height + m_margin.bottom + m_margin.top;
 }
 
 void HBox::render() {
+    auto _margin = Renderer::MoveOrigin(m_margin.left, m_margin.bottom);
     Renderer::DrawQuad(getX(), getY(), m_width, m_height, m_background);
 
-    auto _ = Renderer::MoveOrigin(getX(), getY());
+    auto _child = Renderer::MoveOrigin(getX(), getY());
     for (auto child : m_children)
         child->render();
 }

@@ -1,6 +1,3 @@
-
-//#include "../vendor/imgui/include/imgui.h"
-
 #include "editor.h"
 
 Editor::Editor(float width, float height)
