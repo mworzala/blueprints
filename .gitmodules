@@ -4,3 +4,6 @@
 [submodule "vendor/glfw"]
 	path = vendor/glfw
 	url = https://github.com/glfw/GLFW
+[submodule "vendor/freetype"]
+	path = vendor/freetype
+	url = https://git.savannah.gnu.org/git/freetype/freetype2.git
