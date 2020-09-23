@@ -254,12 +254,12 @@ int main() {
 
     Shader shader("../resources/shader/polygon.vert", "../resources/shader/polygon.frag", "../resources/shader/polygon.geom");
     VertexArray polyVao;
-    VertexBuffer polyVbo;
+    auto* polyVbo = new VertexBuffer();
     float vertices[] = {
             0.0, 0.0
     };
-    polyVbo.setData(vertices, sizeof(vertices));
-    polyVao.addVertexBuffer(&polyVbo);
+    polyVbo->setData(vertices, sizeof(vertices));
+    polyVao.addVertexBuffer(polyVbo);
 
     while (!window.shouldClose()) {
         auto now_time = std::chrono::steady_clock::now();
@@ -292,7 +292,7 @@ int main() {
         shader.use();
         polyVao.bind();
         glDrawArrays(GL_POINTS, 0, 1);
-        polyVbo.unbind();
+        polyVao.unbind();
 
         // ImGui
         ImGui_ImplOpenGL3_NewFrame();
