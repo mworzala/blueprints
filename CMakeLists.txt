@@ -14,9 +14,9 @@ add_subdirectory(vendor/freetype)
 include_directories(vendor/freetype/include)
 
 add_subdirectory(vendor/glfw)
-include_directories(vendor/glfw/include/GLFW)
+include_directories(vendor/glfw/include)
 
-include_directories(vendor/glm/glm)
+include_directories(vendor/glm)
 
 add_subdirectory(vendor/imgui)
 #include_directories(${IMGUI_INCLUDE})
