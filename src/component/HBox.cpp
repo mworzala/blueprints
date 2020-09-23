@@ -1,23 +1,29 @@
 #include "HBox.h"
 
-HBox::HBox(float spacing)
-    : m_spacing(spacing) {}
+HBox::HBox(float spacing, HBoxAlignment alignment)
+    : m_spacing(spacing), m_alignment(alignment) {}
 
 void HBox::layout() {
-    float x = m_padding.left, maxHeight = 0.0f;
+    float height = 0; //todo not great to iterate twice over children, but need max height.
+    for (auto* child : m_children) {
+        child->layout();
+        height = std::max(height, child->getHeight());
+    }
+
+    float x = m_padding.left;
     for (auto child : m_children) {
-        x += maxHeight == 0 ? 0 : m_spacing;
+        x += x == m_padding.left ? 0 : m_spacing;
         child->setX(x);
-        child->setY(m_padding.bottom);
+        if (m_alignment == HBoxAlignment::TOP)
+            child->setY(height - child->getHeight());
+        else
+            child->setY(m_padding.bottom);
         child->layout();
         x += child->getWidth();
-
-        // Check if this height is greater than the current max
-        maxHeight = std::max(maxHeight, child->getHeight());
     }
 
     m_width = x + m_padding.right;
-    m_height = maxHeight + m_padding.bottom + m_padding.top;
+    m_height = height + m_padding.bottom + m_padding.top;
 }
 
 float HBox::getWidth() const {

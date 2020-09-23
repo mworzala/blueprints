@@ -5,8 +5,8 @@ Editor::Editor(float width, float height)
     viewport = {
             .width = width,
             .height = height,
-            .x = 0.0f,
-            .y = 0.0f
+            .x = -width / 2,
+            .y = -height / 2
     };
 }
 

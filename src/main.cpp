@@ -30,7 +30,7 @@ int win_width = 2000.0f;
 int win_height = 2000.0f;
 
 Editor* editor = new Editor(2000, 2000);
-HBox hbox(10.0f);
+HBox hbox(10.0f, HBoxAlignment::TOP);
 
 void key_callback(GLFWwindow *w, int key, int scancode, int action, int mods) {
     if (ImGui::GetIO().WantCaptureKeyboard)
@@ -44,6 +44,9 @@ void key_callback(GLFWwindow *w, int key, int scancode, int action, int mods) {
         editor->viewport.y += 10;
     if (key == GLFW_KEY_DOWN && action != GLFW_RELEASE)
         editor->viewport.y -= 10;
+
+    if (key == GLFW_KEY_G)
+        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 }
 
 float mouse_x = 0.0;
@@ -63,6 +66,7 @@ void mouse_button_callback(GLFWwindow *w, int button, int action, int mods) {
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         auto [x, y] = editor->toCanvasSpace(mouse_x, mouse_y);
+
 //        std::cout << "Click: (" << x << " " << y << ")" << std::endl;
 
     if (hbox.contains(x, y))
@@ -140,10 +144,10 @@ int main() {
     Renderer::Init();
     hbox.setBackground(RGB(1.0, 0.9, 0.8));
     StaticRectangle rect1(50.0f, 20.0f, RGB(0.9, 0.9, 0.5));
-    rect1.setMargin(10);
+    rect1.setMargin(2);
     StaticRectangle rect2(10.0f, 100.0f, RGB(0.6, 0.8, 0.1));
 
-    HBox hbox2(5.0f);
+    HBox hbox2(5.0f, HBoxAlignment::TOP);
     hbox2.setBackground(RGB(0.1, 0.2, 0.3));
     hbox2.setPadding(10.0f, 10.0f, 0.0f, 00.0f);
     hbox2.setMargin(10);
@@ -246,10 +250,16 @@ int main() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-//    t.setX(10);
-//    t.setY(10);
-
     hbox.addChild(&t);
+
+    Shader shader("../resources/shader/polygon.vert", "../resources/shader/polygon.frag", "../resources/shader/polygon.geom");
+    VertexArray polyVao;
+    VertexBuffer polyVbo;
+    float vertices[] = {
+            0.0, 0.0
+    };
+    polyVbo.setData(vertices, sizeof(vertices));
+    polyVao.addVertexBuffer(&polyVbo);
 
     while (!window.shouldClose()) {
         auto now_time = std::chrono::steady_clock::now();
@@ -275,17 +285,14 @@ int main() {
         hbox.layout();
         hbox.render();
 
-//        {
-//            t.setX(100);
-//            t.setY(100);
-//            t.render();
-//        }
-
-
-
         for (auto* thing : stuffToRender)
             thing->render();
 
+
+        shader.use();
+        polyVao.bind();
+        glDrawArrays(GL_POINTS, 0, 1);
+        polyVbo.unbind();
 
         // ImGui
         ImGui_ImplOpenGL3_NewFrame();
