@@ -28,6 +28,9 @@ public:
 
     void resize(float new_width, float new_height);
 
+    float getWidth() const;
+    float getHeight() const;
+
     void onMouseButton(int button, int action, int mods) override;
 
     void render();

@@ -2,11 +2,19 @@
 
 #include <sstream>
 
+#include "../window.h"
 #include "Event.h"
 
 class WindowCloseEvent : public Event {
+private:
+    Window* m_window;
+
 public:
-    WindowCloseEvent() = default;
+    explicit WindowCloseEvent(Window* window) : m_window(window) {};
+
+    Window* getWindow() const {
+        return m_window;
+    }
 
     EVENT_TYPE(WindowClose)
     EVENT_CATEGORY(Application)
@@ -14,8 +22,7 @@ public:
 
 class WindowResizeEvent : public Event {
 private:
-    unsigned int m_width;
-    unsigned int m_height;
+    unsigned int m_width, m_height;
 
 public:
     WindowResizeEvent(unsigned int width, unsigned int height)

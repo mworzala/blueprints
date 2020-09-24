@@ -7,11 +7,16 @@
 #include <GLFW/glfw3.h>
 
 #include "editor.h"
+#include "event/Event.h"
 #include "WindowEventReceiver.h"
+
+class WindowCloseEvent;
 
 class Window : public WindowEventReceiver {
 private:
+    EventBus* m_eventBus;
     GLFWwindow *m_window;
+
     float m_width;
     float m_height;
 
@@ -26,13 +31,13 @@ private:
 
 public:
     Window(const char* title, int initial_width, int initial_height,
-           GLFWkeyfun key_callback, GLFWmousebuttonfun mouse_button_callback,
+           EventBus* eventBus, GLFWkeyfun key_callback, GLFWmousebuttonfun mouse_button_callback,
            GLFWcursorposfun mouse_pos_callback, GLFWscrollfun mouse_scroll_callback);
     ~Window();
 
-    [[nodiscard]] float getWidth() const;
-    [[nodiscard]] float getHeight() const;
-    [[nodiscard]] bool shouldClose() const;
+    float getWidth() const;
+    float getHeight() const;
+    bool shouldClose() const;
     GLFWwindow* getGlfwWindow() const {
         return m_window;
     }

@@ -12,7 +12,7 @@ enum class EventType {
     None = 0,
     WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
     KeyPressed, KeyReleased, KeyTyped,
-    MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
+    MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled,
 };
 
 enum EventCategory {
@@ -60,10 +60,23 @@ public:
         m_handlers.push_back(func);
     }
 
+//    void subscribe2(EventType type, const char* t) {
+//        std::cout << t << std::endl;
+//    }
+
+    template<class T>
+    void test() {
+        std::cout << "\n" << typeid(T).name() << std::endl;
+    }
+
     void dispatch(Event* event) {
         for (const auto& handler : m_handlers)
             handler(event);
     }
 };
 
-#define EVENT_HANDLER(func) [this](Event* e) { return func(e); }
+//#define TEST(type, inst) test<type>(inst)
+
+//#define SUBSCRIBE(type, inst) subscribe2(EventType::WindowClose, "type")
+
+#define EVENT_HANDLER(type, func) [this](Event* e) { return func((type*)e); }

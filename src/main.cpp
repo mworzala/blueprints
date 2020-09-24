@@ -27,10 +27,12 @@
 
 //todo glfwCharCallback is used for typing in text boxes
 
-int win_width = 2000.0f;
-int win_height = 2000.0f;
+float scaling = 2.0f;
 
-Editor* editor = new Editor(2000, 2000);
+float initialWidth = 1280.0f * scaling;
+float initialHeight = 720.0f * scaling;
+
+Editor* editor = new Editor(initialWidth, initialHeight);
 HBox hbox(10.0f, HBoxAlignment::TOP);
 
 void key_callback(GLFWwindow *w, int key, int scancode, int action, int mods) {
@@ -87,7 +89,7 @@ void mouse_pos_callback(GLFWwindow *w, double x, double y) {
     auto new_y = static_cast<float>(y);
 
     if (secondary_button_down && !ImGui::GetIO().WantCaptureMouse) {
-        float scale = (float) win_width / editor->viewport.width;
+        float scale = editor->getWidth() / editor->viewport.width;
         auto dx = (new_x - mouse_x) / scale;
         auto dy = (new_y - mouse_y) / scale;
 
@@ -108,17 +110,17 @@ void mouse_scroll_callback(GLFWwindow *w, double dx, double dy) {
         return;
 
     float nextDeltaX = -ZOOM_SENSITIVITY * static_cast<float>(dy);
-    float nextScale = (float) win_width / (editor->viewport.width + nextDeltaX);
+    float nextScale = editor->getWidth() / (editor->viewport.width + nextDeltaX);
 
     // Calculate and clamp scale, then recalculate deltaX
-    float deltaX = ((float) win_width / std::clamp(nextScale, MIN_SCALE, MAX_SCALE)) - editor->viewport.width;
-    float deltaY = (deltaX * ((float) win_height / (float) win_width));
+    float deltaX = (editor->getWidth() / std::clamp(nextScale, MIN_SCALE, MAX_SCALE)) - editor->viewport.width;
+    float deltaY = (deltaX * (editor->getHeight() / editor->getWidth()));
 
     editor->viewport.width += deltaX;
-    editor->viewport.x -= mouse_x / (float) win_width * deltaX;
+    editor->viewport.x -= mouse_x / editor->getWidth() * deltaX;
 
     editor->viewport.height += deltaY;
-    editor->viewport.y -= ((float)win_width - mouse_y) / (float) win_height * deltaY;
+    editor->viewport.y -= (editor->getHeight() - mouse_y) / editor->getHeight() * deltaY;
 }
 
 class Test {
@@ -127,15 +129,25 @@ private:
 
 public:
     explicit Test(EventBus* eventBus) {
-        eventBus->subscribe(EventType::WindowClose, EVENT_HANDLER(HandleEvent));
+        eventBus->subscribe(EventType::None, EVENT_HANDLER(Event, HandleEvent));
+//        eventBus->TEST(WindowCloseEvent*, nullptr);
+//        eventBus->SUBSCRIBE(WindowCloseEvent, "");
+        eventBus->subscribe(EventType::WindowClose, EVENT_HANDLER(WindowCloseEvent, HandleClose));
+//        eventBus->subscribe <WindowCloseEvent>(HandleClose)
+//        eventBus->subscribe(EventType::WindowClose, HandleClose);
     }
 
     void HandleEvent(Event* event) {
         std::cout << m_name << " <> " << event->toString() << std::endl;
     }
+
+    void HandleClose(WindowCloseEvent* event) {
+        std::cout << m_name << " <poo poo> " << event->toString() << std::endl;
+
+    }
 };
 
-Window window("Blueprint Editor (that doesnt do anything)", 2000, 2000,
+Window window("Blueprint Editor (that doesnt do anything)", static_cast<int>(initialWidth), static_cast<int>(initialHeight), new EventBus(),
               key_callback, mouse_button_callback, mouse_pos_callback, mouse_scroll_callback);
 
 StaticRectangle rect7(30.0f, 50.0f, RGB(0.2, 0.1, 0.4));
@@ -220,24 +232,23 @@ int main() {
 
 
 
-//    auto eventBus = new EventBus();
-//    Test test(eventBus);
-//
-//    WindowCloseEvent testEvent;
-//    eventBus->dispatch(&testEvent);
+    auto eventBus = new EventBus();
+    eventBus->test<WindowCloseEvent>();
+    Test test(eventBus);
+
+    WindowCloseEvent testEvent(&window);
+    eventBus->dispatch(&testEvent);
 
     window.addEditor(editor);
 
     // ImGui Init
-    float highDPIscaleFactor = 2.0f;
-
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void) io;
-    io.Fonts->AddFontFromFileTTF("../resources/font/ubuntu.ttf", 18.0f * highDPIscaleFactor, nullptr, nullptr);
+    io.Fonts->AddFontFromFileTTF("../resources/font/ubuntu.ttf", 18.0f * scaling, nullptr, nullptr);
     ImGui::StyleColorsDark();
     ImGuiStyle &style = ImGui::GetStyle();
-    style.ScaleAllSizes(highDPIscaleFactor);
+    style.ScaleAllSizes(scaling);
 
     ImGui_ImplGlfw_InitForOpenGL(window.getGlfwWindow(), true);
     ImGui_ImplOpenGL3_Init("#version 330");
@@ -297,10 +308,10 @@ int main() {
         for (auto* thing : stuffToRender)
             thing->render();
 
-        shader.use();
-        polyVao.bind();
-        glDrawArrays(GL_POINTS, 0, 1);
-        polyVao.unbind();
+//        shader.use();
+//        polyVao.bind();
+//        glDrawArrays(GL_POINTS, 0, 1);
+//        polyVao.unbind();
 
         // ImGui
         ImGui_ImplOpenGL3_NewFrame();

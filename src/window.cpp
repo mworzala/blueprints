@@ -1,7 +1,7 @@
 #include "window.h"
 
 Window::Window(const char* title, int initial_width, int initial_height,
-               GLFWkeyfun key_callback, GLFWmousebuttonfun mouse_button_callback,
+               EventBus* eventBus, GLFWkeyfun key_callback, GLFWmousebuttonfun mouse_button_callback,
                GLFWcursorposfun mouse_pos_callback, GLFWscrollfun mouse_scroll_callback)
     : m_width(static_cast<float>(initial_width)), m_height(static_cast<float>(initial_height)),
     m_key_callback(key_callback), m_mouse_button_callback(mouse_button_callback), m_mouse_pos_callback(mouse_pos_callback),
