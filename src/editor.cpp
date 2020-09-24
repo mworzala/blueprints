@@ -3,10 +3,10 @@
 Editor::Editor(float width, float height)
     : m_width(width), m_height(height) {
     viewport = {
-            .width = width,
-            .height = height,
-            .x = -width / 2,
-            .y = -height / 2
+            width,
+            height,
+            -width / 2,
+            -height / 2
     };
 }
 

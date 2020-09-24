@@ -14,7 +14,8 @@ add_subdirectory(vendor/freetype)
 include_directories(vendor/freetype/include)
 
 add_subdirectory(vendor/glfw)
-include_directories(vendor/glfw/include)
+set(GLFW_BUILD_DOCS OFF)
+#include_directories(vendor/glfw/include)
 
 include_directories(vendor/glm)
 
@@ -25,5 +26,5 @@ if (WIN32 OR MSVC)
     set(GL_LIBRARIES opengl32)
 endif ()
 
-target_link_libraries(blueprints PUBLIC ${GL_LIBRARIES} glfw glad imgui freetype ${GLFW_LIBRARIES})
+target_link_libraries(blueprints PUBLIC ${GL_LIBRARIES} glfw glad imgui freetype)
 target_include_directories(blueprints PRIVATE vendor/imgui/include ${IMGUI_INCLUDE})

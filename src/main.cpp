@@ -1,6 +1,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <algorithm>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -254,12 +255,20 @@ int main() {
 
     Shader shader("../resources/shader/polygon.vert", "../resources/shader/polygon.frag", "../resources/shader/polygon.geom");
     VertexArray polyVao;
-    auto* polyVbo = new VertexBuffer();
-    float vertices[] = {
-            0.0, 0.0
-    };
-    polyVbo->setData(vertices, sizeof(vertices));
-    polyVao.addVertexBuffer(polyVbo);
+    auto* polyPosVbo = new VertexBuffer();
+    float pos[] = { 0.0, 0.0 };
+    polyPosVbo->setData(pos, sizeof(pos));
+    auto* polyOptsVbo = new VertexBuffer(4);
+    // vertices, filled, radius, thickness
+    float opts[] = { 7, 0, 0.5, 0.1 };
+    polyOptsVbo->setData(opts, sizeof(opts));
+    auto* polyColourVbo = new VertexBuffer(3);
+    float colour[] = { 0.2, 0.2, 0.7 };
+    polyColourVbo->setData(colour, sizeof(colour));
+
+    polyVao.addVertexBuffer(polyPosVbo);
+    polyVao.addVertexBuffer(polyOptsVbo);
+    polyVao.addVertexBuffer(polyColourVbo);
 
     while (!window.shouldClose()) {
         auto now_time = std::chrono::steady_clock::now();
@@ -287,7 +296,6 @@ int main() {
 
         for (auto* thing : stuffToRender)
             thing->render();
-
 
         shader.use();
         polyVao.bind();
