@@ -32,7 +32,7 @@ public:
     static void Init();
     static void CleanUp();
 
-    static void NewFrame(glm::mat4 projection, glm::mat4 view);
+    static void NewFrame(glm::mat4 projectionView);
 
     static void SetOrigin(float x = 0, float y = 0);
     static OriginCursor MoveOrigin(float dx, float dy);

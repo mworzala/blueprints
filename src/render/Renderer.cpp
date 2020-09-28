@@ -26,17 +26,17 @@ void Renderer::CleanUp() {
     delete m_quadShader;
 }
 
-void Renderer::NewFrame(glm::mat4 projection, glm::mat4 view) {
+void Renderer::NewFrame(glm::mat4 projectionView) {
     SetOrigin(0, 0);
     m_drawCalls = 0;
 
     m_quadShader->use();
-    m_quadShader->setMat4("projection", projection);
-    m_quadShader->setMat4("view", view);
+    m_quadShader->setMat4("projection_view", projectionView);
+//    m_quadShader->setMat4("view", view);
 
     m_fontShader->use();
-    m_fontShader->setMat4("projection", projection);
-    m_fontShader->setMat4("view", view);
+    m_fontShader->setMat4("projection_view", projectionView);
+//    m_fontShader->setMat4("view", view);
 }
 
 void Renderer::SetOrigin(float x, float y) {

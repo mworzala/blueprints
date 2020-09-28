@@ -1,9 +1,6 @@
 #pragma once
 
-#include <ostream>
 #include <string>
-#include <functional>
-#include <vector>
 
 // Create an int with a bit in x position.
 #define BIT_ID(x) (1 << x) // NOLINT(hicpp-signed-bitwise)
@@ -12,7 +9,7 @@ enum class EventType {
     None = 0,
     WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
     KeyPressed, KeyReleased, KeyTyped,
-    MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled,
+    MouseButtonPress, MouseButtonRelease, MouseMove, MouseScroll,
 };
 
 enum EventCategory {
@@ -38,45 +35,8 @@ public:
     }
 };
 
-//inline std::ostream& operator <<(std::ostream os, Event& e) {
-//    return os << e.toString();
-//}
-
 #define EVENT_TYPE(type) static EventType getTypeStatic() { return EventType::type; } \
                          virtual EventType getType() const override { return getTypeStatic(); } \
                          virtual const char* getName() const override { return #type; }
 
 #define EVENT_CATEGORY(category) virtual int getCategories() const override { return category; }
-
-class EventBus {
-private:
-    std::vector<std::function<void (Event*)>> m_handlers;
-    
-public:
-    EventBus() = default;
-    ~EventBus() = default;
-
-    void subscribe(EventType type, const std::function<void (Event*)>& func) {
-        m_handlers.push_back(func);
-    }
-
-//    void subscribe2(EventType type, const char* t) {
-//        std::cout << t << std::endl;
-//    }
-
-    template<class T>
-    void test() {
-        std::cout << "\n" << typeid(T).name() << std::endl;
-    }
-
-    void dispatch(Event* event) {
-        for (const auto& handler : m_handlers)
-            handler(event);
-    }
-};
-
-//#define TEST(type, inst) test<type>(inst)
-
-//#define SUBSCRIBE(type, inst) subscribe2(EventType::WindowClose, "type")
-
-#define EVENT_HANDLER(type, func) [this](Event* e) { return func((type*)e); }

@@ -1,11 +1,15 @@
-#include "window.h"
+#include "Window.h"
 
-Window::Window(const char* title, int initial_width, int initial_height,
-               EventBus* eventBus, GLFWkeyfun key_callback, GLFWmousebuttonfun mouse_button_callback,
-               GLFWcursorposfun mouse_pos_callback, GLFWscrollfun mouse_scroll_callback)
-    : m_width(static_cast<float>(initial_width)), m_height(static_cast<float>(initial_height)),
-    m_key_callback(key_callback), m_mouse_button_callback(mouse_button_callback), m_mouse_pos_callback(mouse_pos_callback),
-    m_mouse_scroll_callback(mouse_scroll_callback) {
+#include "event/EventBus.h"
+#include "event/WindowEvent.h"
+#include "event/MouseEvent.h"
+
+void OnGlfwError(int code, const char* error) {
+    std::cerr << "GLFW_ERR_" << code << " << " << error << std::endl;
+}
+
+Window::Window(const char* title, int initial_width, int initial_height)
+    : m_width(static_cast<float>(initial_width)), m_height(static_cast<float>(initial_height)) {
     // Init GLFW todo move this to a static place so it isnt called when making more windows.
     glfwInit();
 
@@ -16,6 +20,8 @@ Window::Window(const char* title, int initial_width, int initial_height,
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
+
+    glfwSetErrorCallback(OnGlfwError);
 
     // Create window
     m_window = glfwCreateWindow(initial_width, initial_height, title, nullptr, nullptr);
@@ -44,7 +50,7 @@ Window::Window(const char* title, int initial_width, int initial_height,
         static_cast<Window*>(glfwGetWindowUserPointer(window))->onKeyPress(key, scancode, action, mods);
     });
     glfwSetMouseButtonCallback(m_window, [](GLFWwindow *window, int button, int action, int mods) {
-        static_cast<Window*>(glfwGetWindowUserPointer(window))->_onMouseButton(button, action, mods);
+        static_cast<Window*>(glfwGetWindowUserPointer(window))->onMouseButton(button, action, mods);
     });
     glfwSetCursorPosCallback(m_window, [](GLFWwindow *window, double x, double y) {
         static_cast<Window*>(glfwGetWindowUserPointer(window))->
@@ -57,9 +63,6 @@ Window::Window(const char* title, int initial_width, int initial_height,
 }
 
 Window::~Window() {
-    for (auto editor : m_editors)
-        delete editor;
-
     glfwTerminate();
 }
 
@@ -80,34 +83,43 @@ void Window::swapBuffers() {
     glfwPollEvents();
 }
 
-void Window::onFramebufferResize(int new_width, int new_height) {
-    glViewport(0, 0, new_width, new_height);
-    m_width = static_cast<float>(new_width);
-    m_height = static_cast<float>(new_height);
+void Window::onFramebufferResize(int newWidthI, int newHeightI) {
+    glViewport(0, 0, newWidthI, newHeightI);
 
-    for (auto editor : m_editors)
-        editor->resize(m_width, m_height);
+    WindowResizeEvent event(this, (float) newWidthI, (float) newHeightI);
+    EventBus::Dispatch(&event);
+
+    m_width = static_cast<float>(newWidthI);
+    m_height = static_cast<float>(newHeightI);
+
 }
 
 void Window::onKeyPress(int key, int scancode, int action, int mods) {
-    (*m_key_callback)(nullptr, key, scancode, action, mods);
+//    (*m_key_callback)(nullptr, key, scancode, action, mods);
 }
 
 void Window::onMouseButton(int button, int action, int mods) {
-    (*m_mouse_button_callback)(nullptr, button, action, mods);
+    if (action == GLFW_PRESS) {
+        MouseButtonPressEvent event(button);
+        EventBus::Dispatch(&event);
+    } else if (action == GLFW_RELEASE) {
+        MouseButtonReleaseEvent event(button);
+        EventBus::Dispatch(&event);
+    }
+//    (*m_mouse_button_callback)(nullptr, button, action, mods);
 }
 
 void Window::onMouseMove(float x, float y) {
-    (*m_mouse_pos_callback)(nullptr, x, y);
+    MouseMoveEvent event(x, y, x - m_lastMouseX, y - m_lastMouseY);
+    EventBus::Dispatch(&event);
+
+    m_lastMouseX = x;
+    m_lastMouseY = y;
+//    (*m_mouse_pos_callback)(nullptr, x, y);
 }
 
 void Window::onMouseScroll(float dx, float dy) {
-    (*m_mouse_scroll_callback)(nullptr, dx, dy);
-}
-
-Editor* Window::addEditor(Editor* editor) {
-    m_activeEditor = editor;
-    WindowEventReceiver::addChild(editor);
-    m_editors.push_back(editor);
-    return editor;
+    MouseScrollEvent event(dx, dy);
+    EventBus::Dispatch(&event);
+//    (*m_mouse_scroll_callback)(nullptr, dx, dy);
 }
