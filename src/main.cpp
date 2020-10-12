@@ -2,6 +2,8 @@
 #include <chrono>
 #include <iostream>
 #include <algorithm>
+#include <random>
+#include <time.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -25,6 +27,7 @@
 
 #include "render/Renderer.h"
 #include "event/EventBus.h"
+#include "render/instanced/InstancedRenderer.h"
 
 //todo glfwCharCallback is used for typing in text boxes
 
@@ -73,13 +76,14 @@ void TempUiControls(Event* event) {
 //}
 
 
-
 StaticRectangle rect7(30.0f, 50.0f, RGB(0.2, 0.1, 0.4));
 
 int main() {
     Mouse::Init();
 
     EventBus::Subscribe(TempUiControls);
+
+    srand(time(nullptr));
 
     Renderer::Init();
     hbox.setBackground(RGB(1.0, 0.9, 0.8));
@@ -152,29 +156,112 @@ int main() {
 
     auto last_time = std::chrono::steady_clock::now();
 
-    glfwSwapInterval(0.5);
+    glfwSwapInterval(0);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    glEnable(GL_DEPTH_TEST);
+
     hbox.addChild(&t);
 
-    Shader shader("../resources/shader/polygon.vert", "../resources/shader/polygon.frag", "../resources/shader/polygon.geom");
-    VertexArray polyVao;
-    auto* polyPosVbo = new VertexBuffer();
-    float pos[] = { 0.0, 0.0 };
-    polyPosVbo->setData(pos, sizeof(pos));
-    auto* polyOptsVbo = new VertexBuffer(4);
-    // vertices, filled, radius, thickness
-    float opts[] = { 7, 0, 0.5, 0.1 };
-    polyOptsVbo->setData(opts, sizeof(opts));
-    auto* polyColourVbo = new VertexBuffer(3);
-    float colour[] = { 0.2, 0.2, 0.7 };
-    polyColourVbo->setData(colour, sizeof(colour));
+//    Shader shader("../resources/shader/polygon.vert", "../resources/shader/polygon.frag", "../resources/shader/polygon.geom");
+//    VertexArray polyVao;
+//    auto* polyPosVbo = new VertexBuffer();
+//    float pos[] = { 0.0, 0.0 };
+//    polyPosVbo->setData(pos, sizeof(pos));
+//    auto* polyOptsVbo = new VertexBuffer(4);
+//    // vertices, filled, radius, thickness
+//    float opts[] = { 7, 0, 0.5, 0.1 };
+//    polyOptsVbo->setData(opts, sizeof(opts));
+//    auto* polyColourVbo = new VertexBuffer(3);
+//    float colour[] = { 0.2, 0.2, 0.7 };
+//    polyColourVbo->setData(colour, sizeof(colour));
+//
+//    polyVao.addVertexBuffer(polyPosVbo);
+//    polyVao.addVertexBuffer(polyOptsVbo);
+//    polyVao.addVertexBuffer(polyColourVbo);
 
-    polyVao.addVertexBuffer(polyPosVbo);
-    polyVao.addVertexBuffer(polyOptsVbo);
-    polyVao.addVertexBuffer(polyColourVbo);
+//    float instVertices[] = {
+//            0.0f, 0.0f,
+//            1.0f, 0.0f,
+//            0.0f, 1.0f,
+//            1.0f, 1.0f,
+//    };
+
+//    std::vector<float> vertexData;
+//    int quads = 100000;
+//    for (int i = 0; i < quads; i++) {
+//        // Position
+//        vertexData.push_back(((float) std::rand() / (float) RAND_MAX) * 1000);
+//        vertexData.push_back(((float) std::rand() / (float) RAND_MAX) * 1000);
+//
+//        // Scale
+//        vertexData.push_back(100);
+//        vertexData.push_back(100);
+//
+//        // Colour
+//        vertexData.push_back((float) std::rand() / (float) RAND_MAX);
+//        vertexData.push_back((float) std::rand() / (float) RAND_MAX);
+//        vertexData.push_back((float) std::rand() / (float) RAND_MAX);
+//    }
+
+//    float vertexData[] = {
+//            // translate scale        colour
+//            0.5, 0.5,    0.1, 0.1,    0.5, 0.3, 0.7,
+//            0.0, 0.0,    0.2, 0.2,    0.2, 0.1, 0.3,
+//    };
+
+    auto* instShader = new Shader("../resources/shader/instanced/quad.vert", "../resources/shader/instanced/quad.frag");
+
+//    unsigned int instVao;
+//    glGenVertexArrays(1, &instVao);
+//    glBindVertexArray(instVao);
+//
+//    unsigned int instVertVbo;
+//    glGenBuffers(1, &instVertVbo);
+//    glBindBuffer(GL_ARRAY_BUFFER, instVertVbo);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(instVertices), instVertices, GL_STATIC_DRAW);
+//    glEnableVertexAttribArray(0);
+//
+//    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
+//
+//    unsigned int instInfoVbo;
+//    glGenBuffers(1, &instInfoVbo);
+//    glBindBuffer(GL_ARRAY_BUFFER, instInfoVbo);
+//    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), &vertexData[0], GL_STATIC_DRAW);
+//    glEnableVertexAttribArray(1);
+//    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+//    glVertexAttribDivisor(1, 1);
+//    glEnableVertexAttribArray(2);
+//    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*) (4 * sizeof(float)));
+//    glVertexAttribDivisor(2, 1);
+
+    InstancedRenderer::Init();
+//    auto* q1 = InstancedRenderer::AllocateQuad();
+//    auto* q2 = InstancedRenderer::AllocateQuad();
+
+    InstancedQuadRenderer::PreUpdate();
+
+    for (int i = 0; i < 300000; i++) {
+        auto* q = InstancedRenderer::AllocateQuad();
+        q->translate(((float) std::rand() / (float) RAND_MAX) * 1000, ((float) std::rand() / (float) RAND_MAX) * 1000, -0.1);
+        q->setColour(RGB((float) std::rand() / (float) RAND_MAX, (float) std::rand() / (float) RAND_MAX, (float) std::rand() / (float) RAND_MAX));
+        q->setScale(100, 100);
+        q->update();
+    }
+
+//    q1->translate(0.5, 0, -0.1);
+//    q1->setColour(RGB(0.3, 0.7, 0.2));
+//    q1->setScale(2000, 1000);
+//    q1->update();
+//
+//    q2->translate(0, 0, 0);
+//    q2->setColour(RGB(0.2, 0.3, 0.7));
+//    q2->setScale(1000, 1000);
+//    q2->update();
+
+    InstancedQuadRenderer::PostUpdate();
 
     while (!window->shouldClose()) {
         auto now_time = std::chrono::steady_clock::now();
@@ -184,7 +271,12 @@ int main() {
         last_time = now_time;
 
         glClearColor(0.19f, 0.19f, 0.19f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+//        instShader->use();
+//        instShader->setMat4("projection_view", editor->getViewport()->getProjectionViewMatrix());
+        InstancedRenderer::Render(editor->getViewport()->getProjectionViewMatrix());
+//        glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, quads);
 
         // Rendering Setup
 //        glm::mat4 view = glm::mat4(1.0f);
@@ -194,18 +286,17 @@ int main() {
 //        glm::mat4 proj;
 //        proj = glm::ortho(0.0f, editor->viewport.width, 0.0f, editor->viewport.height, 0.0f, 100.0f);
 
-        Renderer::NewFrame(editor->getViewport()->getProjectionViewMatrix());
-//        Renderer::NewFrame(proj, view);
+//        Renderer::NewFrame(editor->getViewport()->getProjectionViewMatrix());
 
-        hbox.setBackground(outerHboxColor);
-        hbox.layout();
-        hbox.render();
+//        hbox.setBackground(outerHboxColor);
+//        hbox.layout();
+//        hbox.render();
 
 
-        shader.use();
-        polyVao.bind();
-        glDrawArrays(GL_POINTS, 0, 1);
-        polyVao.unbind();
+//        shader.use();
+//        polyVao.bind();
+//        glDrawArrays(GL_POINTS, 0, 1);
+//        polyVao.unbind();
 
         // ImGui
         ImGui_ImplOpenGL3_NewFrame();
@@ -220,7 +311,8 @@ int main() {
             ImGui::Begin("Debug", nullptr, ImGuiWindowFlags_DockNodeHost);
 
             ImGui::Text("FPS: %.1f", fps);
-            ImGui::Text("Draw Calls: %d", Renderer::GetDrawCalls());
+            ImGui::Text("Draw Calls: %d", Renderer::GetDrawCalls() + InstancedRenderer::GetDrawCalls());
+//            ImGui::Text("Quads: %d", quads);
 
             if (ImGui::Button("Open Demo Window"))
                 demoWindowOpen = true;
@@ -228,30 +320,30 @@ int main() {
             ImGui::End();
         }
 
-        {
-            ImGui::Begin("Test Window", nullptr,ImGuiWindowFlags_DockNodeHost);
-
-            ImGui::Text("ImGui Test");
-            ImGui::ColorEdit4("Outer BG Color", glm::value_ptr(outerHboxColor));
-
-            ImGui::End();
-        }
-
-        {
-            ImGui::Begin("DT Window 1");
-
-            ImGui::TextUnformatted("Docking Test 1");
-
-            ImGui::End();
-        }
-
-        {
-            ImGui::Begin("DT Window 2");
-
-            ImGui::TextUnformatted("Docking Test 2");
-
-            ImGui::End();
-        }
+//        {
+//            ImGui::Begin("Test Window", nullptr,ImGuiWindowFlags_DockNodeHost);
+//
+//            ImGui::Text("ImGui Test");
+//            ImGui::ColorEdit4("Outer BG Color", glm::value_ptr(outerHboxColor));
+//
+//            ImGui::End();
+//        }
+//
+//        {
+//            ImGui::Begin("DT Window 1");
+//
+//            ImGui::TextUnformatted("Docking Test 1");
+//
+//            ImGui::End();
+//        }
+//
+//        {
+//            ImGui::Begin("DT Window 2");
+//
+//            ImGui::TextUnformatted("Docking Test 2");
+//
+//            ImGui::End();
+//        }
 
 
         ImGui::Render();

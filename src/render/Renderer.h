@@ -39,6 +39,7 @@ public:
     static void MoveOriginUnsafe(float dx, float dy);
 
     // Drawing
+    static void DrawQuad(glm::mat4 model, glm::vec4 color);
     static void DrawQuad(float x, float y, float width, float height, glm::vec4 color);
 
     static void DrawText(const std::string& text, float x, float y, float size, glm::vec4 color);

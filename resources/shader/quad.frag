@@ -5,7 +5,6 @@ in vec2 vert_pos;
 out vec4 pixel_color;
 
 uniform vec4 color;
-uniform float radius;
 uniform vec4 corner_radii;
 
 void main() {

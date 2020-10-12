@@ -59,6 +59,10 @@ void Renderer::DrawQuad(float x, float y, float width, float height, glm::vec4 c
     model = glm::translate(model, glm::vec3((x + m_originX) * RENDER_SCALE, (y + m_originY) * RENDER_SCALE, 0.0f));
     model = glm::scale(model, glm::vec3(width * RENDER_SCALE, height * RENDER_SCALE, 1.0f));
 
+    DrawQuad(model, color);
+}
+
+void Renderer::DrawQuad(glm::mat4 model, glm::vec4 color) {
     m_quadShader->use();
     m_quadShader->setVec4("color", color);
     m_quadShader->setMat4("model", model);

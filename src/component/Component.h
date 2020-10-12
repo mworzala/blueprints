@@ -13,7 +13,7 @@ typedef void (*ClickCallback)(float x, float y);
 class Component {
 private:
     // The x and y location of this component relative to it's parent's origin.
-    float m_x, m_y;
+    float m_x{}, m_y{}, m_z{};
 
     ClickCallback m_onClick = nullptr;
 
@@ -21,10 +21,11 @@ protected:
     Box m_padding;
     Box m_margin;
 
-    Component()
-        : m_x(0.0f), m_y(0.0f) {}
-
     glm::vec4 m_background = RGBA(1.0f, 1.0f, 1.0f, 0.0f);
+
+    Component() = default;
+
+    void setZ(float z) { m_z = z; }
 public:
     float getX() const { return m_x; }
     float getY() const { return m_y; }
