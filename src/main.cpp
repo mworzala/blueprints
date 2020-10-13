@@ -254,8 +254,8 @@ int main() {
     auto last_time = std::chrono::steady_clock::now();
 
     glfwSwapInterval(1);
-    glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(MessageCallback, nullptr);
+//    glEnable(GL_DEBUG_OUTPUT);
+//    glDebugMessageCallback(MessageCallback, nullptr);
 //    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
 
@@ -637,7 +637,7 @@ int main() {
 
         {
             ImGui::Begin("Font Texture Atlas");
-            ImGui::Image((void *) (GLuint) ubuntuAtlasId, ImVec2((float) atlasWidth, (float) atlasHeight));
+            ImGui::Image((void *) (GLuint) ubuntuAtlasId, ImVec2((float) atlasWidth * 1.5, (float) atlasHeight * 1.5));
 
             ImGui::SliderInt("Colour Channel", &ch, 0, 3);
             ImGui::End();

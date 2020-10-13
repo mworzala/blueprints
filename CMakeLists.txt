@@ -20,6 +20,7 @@ set(GLFW_BUILD_DOCS OFF)
 #include_directories(vendor/glfw/include)
 
 include_directories(vendor/glm)
+include_directories(vendor/imgui/include)
 
 #add_subdirectory(vendor/imgui)
 #include_directories(${IMGUI_INCLUDE})
@@ -29,4 +30,4 @@ if (WIN32 OR MSVC)
 endif ()
 
 target_link_libraries(blueprints PUBLIC ${GL_LIBRARIES} glfw glad freetype)
-target_include_directories(blueprints PRIVATE vendor/imgui/include ${IMGUI_INCLUDE})
+#target_include_directories(blueprints PRIVATE vendor/imgui/include ${IMGUI_INCLUDE})
