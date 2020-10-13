@@ -48,7 +48,9 @@ struct Rectangle {
     int height;
 };
 
-std::vector<Rectangle> freeRectangles;
+#define CHANNELS 4
+
+std::vector<Rectangle> freeRectangles[CHANNELS];
 
 int area(Rectangle src) {
     return src.width * src.height;
@@ -78,13 +80,13 @@ int sortIds(std::pair<int, int> a, std::pair<int, int> b) {
     return a.second > b.second;
 }
 
-int findBestCut(int width, int height) {
+int findBestCut(int j, int width, int height) {
     int best = -1;
     int bestExtra = 2147483647;
-    for (int i = 0; i < freeRectangles.size(); i++) {
-        if (!fits(freeRectangles[i], width, height)) continue;
+    for (int i = 0; i < freeRectangles[j].size(); i++) {
+        if (!fits(freeRectangles[j][i], width, height)) continue;
 
-        auto[sm, lg] = insert(freeRectangles[i], width, height);
+        auto[sm, lg] = insert(freeRectangles[j][i], width, height);
         auto smArea = area(sm);
         if (smArea < bestExtra) {
             bestExtra = smArea;
@@ -92,6 +94,31 @@ int findBestCut(int width, int height) {
         }
     }
     return best;
+}
+
+
+std::tuple<int, Rectangle> tryInsertAny(int w, int h) {
+    for (int i = 0; i < CHANNELS; i++) {
+        int bestFit = findBestCut(i, w, h);
+        if (bestFit == -1)
+            continue;
+
+        auto r = freeRectangles[i][bestFit];
+        freeRectangles[i].erase(freeRectangles[i].begin() + bestFit);
+        auto[sm, lg] = insert(r, w, h);
+        freeRectangles[i].push_back(sm);
+        freeRectangles[i].push_back(lg);
+        return { i, r };
+    }
+    throw std::runtime_error("Cannot pack texture in the given size!");
+}
+
+void myTexSubImage2D(unsigned char* image, int imageWidth, int channel, int x, int y, int w, int h, const unsigned char* data) {
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            image[(((y + i) * imageWidth) + (x + j)) * CHANNELS + channel] = data[(i * w) + j];
+        }
+    }
 }
 
 void MessageCallback(GLenum source,
@@ -406,7 +433,10 @@ int main() {
     std::sort(ids.begin(), ids.end(), sortIds);
 
     int atlasWidth = std::sqrt(area);
-    atlasWidth *= 1.06;
+//    atlasWidth *= 1.06;
+//    atlasWidth *= 0.58;  // With no retry
+//    atlasWidth *= 0.535; // With no specified order
+    atlasWidth *= 0.535; // With retry in rest
     int atlasHeight = atlasWidth;
 
     unsigned int ubuntuAtlasId;
@@ -416,19 +446,33 @@ int main() {
     glBindTexture(GL_TEXTURE_2D, ubuntuAtlasId);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    // Setup texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, atlasWidth, atlasHeight, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    std::vector<unsigned char> blank;
+//    blank.reserve(atlasWidth * atlasHeight);
+//    for (int i = 0; i < atlasWidth * atlasHeight; i++)
+//        blank.push_back(0);
+
+//    // Setup texture
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, atlasWidth, atlasHeight, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // Draw characters
-    freeRectangles.push_back({0, 0, atlasWidth, atlasHeight});
+    int channels = CHANNELS;
+    freeRectangles[0].push_back({0, 0, atlasWidth, atlasHeight});
+    freeRectangles[1].push_back({0, 0, atlasWidth, atlasHeight});
+    freeRectangles[2].push_back({0, 0, atlasWidth, atlasHeight});
+    freeRectangles[3].push_back({0, 0, atlasWidth, atlasHeight});
 
 //    int i = 32;
 
-    for (auto p : ids) {
+    auto* image = new unsigned char[atlasWidth * atlasHeight * CHANNELS]{0};
+//    for (int i = 0; i < atlasWidth * atlasHeight * 3; i+=3)
+//        image[i] = 255;
+
+    for (int i = 0; i < ids.size(); i++) {
+        auto p = ids[i];
         std::cout << p.first << std::endl;
         if (FT_Load_Char(face, p.first, FT_LOAD_RENDER))
             continue;
@@ -436,24 +480,41 @@ int main() {
         int gw = (int) face->glyph->bitmap.width;
         int gh = (int) face->glyph->bitmap.rows;
 
-        int bestFit = findBestCut(gw, gh);
-        if (bestFit == -1)
-            throw std::runtime_error("Cannot pack texture in the given size!");
+        // Must insert into current channel
+//        int bestFit = findBestCut(i % channels, gw, gh);
+//        if (bestFit == -1)
+//            throw std::runtime_error("Cannot pack texture in the given size!");
+//
+//        auto r = freeRectangles[i % channels][bestFit];
+//        freeRectangles[i % channels].erase(freeRectangles[i % channels].begin() + bestFit);
+//        auto[sm, lg] = insert(r, gw, gh);
+//        freeRectangles[i % channels].push_back(sm);
+//        freeRectangles[i % channels].push_back(lg);
 
-        auto r = freeRectangles[bestFit];
-        freeRectangles.erase(freeRectangles.begin() + bestFit);
-        auto[sm, lg] = insert(r, gw, gh);
-        freeRectangles.push_back(sm);
-        freeRectangles.push_back(lg);
+        // Insert into any
+        auto [ch, r] = tryInsertAny(gw, gh);
 
-        std::vector<unsigned char> idata;
-        idata.reserve(gw * gh);
-        for (int j = 0; j < gw * gh; j++)
-            idata.push_back(255);
+//        std::vector<unsigned char> idata;
+//        idata.reserve(gw * gh);
+//        for (int j = 0; j < gw * gh; j++)
+//            idata.push_back(255);
 
-        glTexSubImage2D(GL_TEXTURE_2D, 0, r.x, r.y, gw, gh, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+
+        myTexSubImage2D(image, atlasWidth, ch, r.x, r.y, gw, gh, face->glyph->bitmap.buffer);
+//        myTexSubImage2D(image, atlasWidth, i % channels, r.x, r.y, gw, gh, &idata[0]);
+//        glTexSubImage2D(GL_TEXTURE_2D, 0, r.x, r.y, gw, gh, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+
 //        glTexSubImage2D(GL_TEXTURE_2D, 0, r.x, r.y, gw, gh, GL_RED, GL_UNSIGNED_BYTE, &idata[0]);
     }
+
+    // Setup texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlasWidth, atlasHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    delete[] image;
 
 //    for (int i = 32; i < 128; i++) {
 //
@@ -513,12 +574,15 @@ int main() {
 //        auto it = font->find('a');
 //        FTChar c = it->second;
 
+        static int ch = 0;
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, ubuntuAtlasId);
 
         fontShader.use();
         fontShader.setMat4("projection_view", editor->getViewport()->getProjectionViewMatrix());
         fontShader.setInt("font_tex", 0);
+        fontShader.setInt("channel", ch);
 
         fontVao->bind();
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 6);
@@ -575,33 +639,7 @@ int main() {
             ImGui::Begin("Font Texture Atlas");
             ImGui::Image((void *) (GLuint) ubuntuAtlasId, ImVec2((float) atlasWidth, (float) atlasHeight));
 
-            if (ImGui::Button("Next Character")) {
-//                if (FT_Load_Char(face, i, FT_LOAD_RENDER))
-//                    continue;
-//
-//                int gw = (int) face->glyph->bitmap.width;
-//                int gh = (int) face->glyph->bitmap.rows;
-//
-//                int bestFit = findBestCut(gw, gh);
-//                if (bestFit == -1)
-//                    throw std::runtime_error("Cannot pack texture in the given size!");
-//
-//                auto r = freeRectangles[bestFit];
-//                freeRectangles.erase(freeRectangles.begin() + bestFit);
-//                auto[sm, lg] = insert(r, gw, gh);
-//                freeRectangles.push_back(sm);
-//                freeRectangles.push_back(lg);
-//
-//                std::vector<unsigned char> idata;
-//                idata.reserve(gw * gh);
-//                for (int j = 0; j < gw * gh; j++)
-//                    idata.push_back(255);
-//
-////                glTexSubImage2D(GL_TEXTURE_2D, 0, r.x, r.y, gw, gh, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
-//                glTexSubImage2D(GL_TEXTURE_2D, 0, r.x, r.y, gw, gh, GL_RED, GL_UNSIGNED_BYTE, &idata[0]);
-//
-//                i++;
-            }
+            ImGui::SliderInt("Colour Channel", &ch, 0, 3);
             ImGui::End();
         }
 
