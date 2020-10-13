@@ -18,7 +18,7 @@ void *FontHelper::LoadFont(const std::string &name, const std::string &filePath)
     }
 
     // set size to load glyphs as
-    FT_Set_Pixel_Sizes(face, 0, 1000);
+    FT_Set_Pixel_Sizes(face, 0, 96);
 
     // disable byte-alignment restriction
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

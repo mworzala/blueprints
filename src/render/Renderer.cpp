@@ -169,7 +169,7 @@ void Renderer::InitQuadRenderer() {
 }
 
 void Renderer::InitFontRenderer() {
-    FontHelper::LoadFont("ubuntu", "../resources/font/ubuntu.ttf");
+//    FontHelper::LoadFont("ubuntu", "../resources/font/ubuntu.ttf");
 
     m_fontShader = new Shader("../resources/shader/font.vert", "../resources/shader/font.frag");
 

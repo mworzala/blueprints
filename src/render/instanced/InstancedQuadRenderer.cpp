@@ -5,7 +5,7 @@
 
 Shader* InstancedQuadRenderer::m_shader = new Shader("../resources/shader/instanced/quad.vert", "../resources/shader/instanced/quad.frag");
 
-int InstancedQuadRenderer::m_size = 300000;
+int InstancedQuadRenderer::m_size = 1;
 std::vector<int> InstancedQuadRenderer::m_free{};
 
 VertexArray *InstancedQuadRenderer::m_vao;
@@ -75,6 +75,7 @@ void InstancedQuadRenderer::FreeQuad(int index) {
     m_free.push_back(index);
 }
 
+//todo add a Reserve or PreAllocate function to init with more space so it doesnt need to resize often.
 void InstancedQuadRenderer::Resize() {
     // Create temporary buffer
     VertexBuffer temp(0);
@@ -86,7 +87,7 @@ void InstancedQuadRenderer::Resize() {
     m_dataBuffer->copyTo(&temp, m_size * QUAD_FLOAT_LENGTH);
 
     // Resize data
-    m_dataBuffer->setDynamic_s(m_size * 2);
+    m_dataBuffer->setDynamic_s(m_size * QUAD_FLOAT_LENGTH * 2);
 
     // Copy from temp to data
     temp.copyTo(m_dataBuffer, m_size * QUAD_FLOAT_LENGTH);

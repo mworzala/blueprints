@@ -3,6 +3,7 @@
 VertexBuffer::VertexBuffer(int size, VertexType type)
     : m_size(size), m_type(type) {
     glGenBuffers(1, &m_id);
+    unbind();
 }
 
 VertexBuffer::~VertexBuffer() {
@@ -11,7 +12,8 @@ VertexBuffer::~VertexBuffer() {
 
 void VertexBuffer::bind(unsigned int target) {
     if (m_binding != -1)
-        throw std::runtime_error("Cannot re-bind an already bound vertex buffer! Unbind the buffer first.");
+        unbind();
+//        throw std::runtime_error("Cannot re-bind an already bound vertex buffer! Unbind the buffer first.");
     glBindBuffer(target, m_id);
     m_binding = target;
 }
@@ -55,7 +57,7 @@ void VertexBuffer::setData(const void *data, unsigned int size, unsigned int off
     unbind();
 }
 
-void VertexBuffer::copyTo(VertexBuffer *other, int amount, int ro, int wo) {
+void VertexBuffer:: copyTo(VertexBuffer *other, int amount, int ro, int wo) {
     bind(GL_COPY_READ_BUFFER);
     other->bind(GL_COPY_WRITE_BUFFER);
 

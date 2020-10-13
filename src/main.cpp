@@ -36,20 +36,88 @@ float scaling = 2.0f;
 float initialWidth = 1280.0f * scaling;
 float initialHeight = 720.0f * scaling;
 
-Window* window = new Window("Blueprint Editor (that doesnt do anything)", static_cast<int>(initialWidth), static_cast<int>(initialHeight));
-Editor* editor = new Editor(window, initialWidth, initialHeight);
+Window *window = new Window("Blueprint Editor (that doesnt do anything)", static_cast<int>(initialWidth),
+                            static_cast<int>(initialHeight));
+Editor *editor = new Editor(window, initialWidth, initialHeight);
 HBox hbox(10.0f, HBoxAlignment::TOP);
 
-void TempUiControls(Event* event) {
+struct Rectangle {
+    int x;
+    int y;
+    int width;
+    int height;
+};
+
+std::vector<Rectangle> freeRectangles;
+
+int area(Rectangle src) {
+    return src.width * src.height;
+}
+
+bool fits(Rectangle src, int width, int height) {
+    return src.width >= width && src.height >= height;
+}
+
+std::tuple<Rectangle, Rectangle> insert(Rectangle src, int width, int height) {
+    if (width > height) {
+        // Split horizontally
+        return {
+                {src.x + width, src.y,              src.width - width, /**/height},        // Right
+                {src.x,         src.y + height, /**/src.width,             src.height - height}   // Bottom
+        };
+    } else {
+        // Split vertically
+        return {
+                {src.x,         src.y + height, /**/width,                 src.height - height},  // Bottom
+                {src.x + width, src.y,              src.width - width, /**/src.height} // Right
+        };
+    }
+}
+
+int sortIds(std::pair<int, int> a, std::pair<int, int> b) {
+    return a.second > b.second;
+}
+
+int findBestCut(int width, int height) {
+    int best = -1;
+    int bestExtra = 2147483647;
+    for (int i = 0; i < freeRectangles.size(); i++) {
+        if (!fits(freeRectangles[i], width, height)) continue;
+
+        auto[sm, lg] = insert(freeRectangles[i], width, height);
+        auto smArea = area(sm);
+        if (smArea < bestExtra) {
+            bestExtra = smArea;
+            best = i;
+        }
+    }
+    return best;
+}
+
+void MessageCallback(GLenum source,
+                     GLenum type,
+                     GLuint id,
+                     GLenum severity,
+                     GLsizei length,
+                     const GLchar *message,
+                     const void *userParam) {
+//    std::cout << GL_DEBUG_SEVERITY_HIGH << " " << GL_DEBUG_SEVERITY_MEDIUM << " " << GL_DEBUG_SEVERITY_LOW << " " << GL_DEBUG_SEVERITY_NOTIFICATION << std::endl;
+
+//    fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+//             ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
+//             type, severity, message );
+}
+
+void TempUiControls(Event *event) {
     if (event->getType() == EventType::WindowResize)
         std::cout << event->toString() << std::endl;
 
     if (event->isInCategory(EventCategory::Mouse) && !ImGui::GetIO().WantCaptureMouse) {
         // HBox clicking
         if (event->getType() == EventType::MouseButtonRelease) {
-            if (((MouseButtonReleaseEvent*) event)->getButton() == 0) {
-                auto [mouseX, mouseY] = Mouse::GetMousePosition();
-                auto [x, y] = editor->toCanvasSpace(mouseX, mouseY);
+            if (((MouseButtonReleaseEvent *) event)->getButton() == 0) {
+                auto[mouseX, mouseY] = Mouse::GetMousePosition();
+                auto[x, y] = editor->toCanvasSpace(mouseX, mouseY);
 
                 if (hbox.contains(x, y))
                     hbox.handleClick(x - hbox.getX(), y - hbox.getY());
@@ -79,6 +147,7 @@ void TempUiControls(Event* event) {
 StaticRectangle rect7(30.0f, 50.0f, RGB(0.2, 0.1, 0.4));
 
 int main() {
+
     Mouse::Init();
 
     EventBus::Subscribe(TempUiControls);
@@ -86,25 +155,25 @@ int main() {
     srand(time(nullptr));
 
     Renderer::Init();
-    hbox.setBackground(RGB(1.0, 0.9, 0.8));
-    StaticRectangle rect1(50.0f, 20.0f, RGB(0.9, 0.9, 0.5));
-    rect1.setMargin(2);
-    StaticRectangle rect2(10.0f, 100.0f, RGB(0.6, 0.8, 0.1));
-
-    HBox hbox2(5.0f, HBoxAlignment::TOP);
-    hbox2.setBackground(RGB(0.1, 0.2, 0.3));
-    hbox2.setPadding(10.0f, 10.0f, 0.0f, 00.0f);
-    hbox2.setMargin(10);
-    StaticRectangle rect3(10.0f, 10.0f, RGB(0.2, 0.4, 0.1));
-    StaticRectangle rect4(30.0f, 50.0f, RGB(0.7, 0.1, 0.4));
-    rect4.setMargin(5.0f);
-
-    hbox.addChild(&rect1);
-    hbox.addChild(&rect2);
-    hbox.addChild(&hbox2);
-
-    hbox2.addChild(&rect3);
-    hbox2.addChild(&rect4);
+//    hbox.setBackground(RGB(1.0, 0.9, 0.8));
+//    StaticRectangle rect1(50.0f, 20.0f, RGB(0.9, 0.9, 0.5));
+//    rect1.setMargin(2);
+//    StaticRectangle rect2(10.0f, 100.0f, RGB(0.6, 0.8, 0.1));
+//
+//    HBox hbox2(5.0f, HBoxAlignment::TOP);
+//    hbox2.setBackground(RGB(0.1, 0.2, 0.3));
+//    hbox2.setPadding(10.0f, 10.0f, 0.0f, 00.0f);
+//    hbox2.setMargin(10);
+//    StaticRectangle rect3(10.0f, 10.0f, RGB(0.2, 0.4, 0.1));
+//    StaticRectangle rect4(30.0f, 50.0f, RGB(0.7, 0.1, 0.4));
+//    rect4.setMargin(5.0f);
+//
+//    hbox.addChild(&rect1);
+//    hbox.addChild(&rect2);
+//    hbox.addChild(&hbox2);
+//
+//    hbox2.addChild(&rect3);
+//    hbox2.addChild(&rect4);
 
 //    hbox.setBackground(RGB(1.0, 0.9, 0.8));
 //    StaticRectangle rect4(30.0f, 50.0f, RGB(0.7, 0.1, 0.4));
@@ -128,21 +197,22 @@ int main() {
 //    hbox.addChild(&hboxAlt);
 //    hbox.addChild(&hboxAlt2);
 
-    StaticRectangle a(100, 100, RGB(0.7, 0.1, 0.4));
-
-    Text t("Hello, World");
-    t.setPadding(10);
-    t.setMargin(10);
-    t.setBackground(RGB(0.6, 0.7, 0.8));
-
-    hbox.setOnClick([](float x, float y) {
-        std::cout << "Clicked on HBox!" << std::endl;
-    });
+//    StaticRectangle a(100, 100, RGB(0.7, 0.1, 0.4));
+//
+//    Text t("Hello, World");
+//    t.setPadding(10);
+//    t.setMargin(10);
+//    t.setBackground(RGB(0.6, 0.7, 0.8));
+//
+//    hbox.setOnClick([](float x, float y) {
+//        std::cout << "Clicked on HBox!" << std::endl;
+//    });
 
     // ImGui Init
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void) io;
+    ImGuiIO &io = ImGui::GetIO();
+    (void) io;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.Fonts->AddFontFromFileTTF("../resources/font/ubuntu.ttf", 18.0f * scaling, nullptr, nullptr);
     ImGui::StyleColorsDark();
@@ -156,15 +226,20 @@ int main() {
 
     auto last_time = std::chrono::steady_clock::now();
 
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(MessageCallback, nullptr);
+//    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glEnable(GL_DEPTH_TEST);
 
-    hbox.addChild(&t);
+//    hbox.addChild(&t);
 
+    // NON INSTANCED POLYGON RENDERING
 //    Shader shader("../resources/shader/polygon.vert", "../resources/shader/polygon.frag", "../resources/shader/polygon.geom");
 //    VertexArray polyVao;
 //    auto* polyPosVbo = new VertexBuffer();
@@ -182,76 +257,15 @@ int main() {
 //    polyVao.addVertexBuffer(polyOptsVbo);
 //    polyVao.addVertexBuffer(polyColourVbo);
 
-//    float instVertices[] = {
-//            0.0f, 0.0f,
-//            1.0f, 0.0f,
-//            0.0f, 1.0f,
-//            1.0f, 1.0f,
-//    };
-
-//    std::vector<float> vertexData;
-//    int quads = 100000;
-//    for (int i = 0; i < quads; i++) {
-//        // Position
-//        vertexData.push_back(((float) std::rand() / (float) RAND_MAX) * 1000);
-//        vertexData.push_back(((float) std::rand() / (float) RAND_MAX) * 1000);
-//
-//        // Scale
-//        vertexData.push_back(100);
-//        vertexData.push_back(100);
-//
-//        // Colour
-//        vertexData.push_back((float) std::rand() / (float) RAND_MAX);
-//        vertexData.push_back((float) std::rand() / (float) RAND_MAX);
-//        vertexData.push_back((float) std::rand() / (float) RAND_MAX);
-//    }
-
-//    float vertexData[] = {
-//            // translate scale        colour
-//            0.5, 0.5,    0.1, 0.1,    0.5, 0.3, 0.7,
-//            0.0, 0.0,    0.2, 0.2,    0.2, 0.1, 0.3,
-//    };
-
-    auto* instShader = new Shader("../resources/shader/instanced/quad.vert", "../resources/shader/instanced/quad.frag");
-
-//    unsigned int instVao;
-//    glGenVertexArrays(1, &instVao);
-//    glBindVertexArray(instVao);
-//
-//    unsigned int instVertVbo;
-//    glGenBuffers(1, &instVertVbo);
-//    glBindBuffer(GL_ARRAY_BUFFER, instVertVbo);
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(instVertices), instVertices, GL_STATIC_DRAW);
-//    glEnableVertexAttribArray(0);
-//
-//    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
-//
-//    unsigned int instInfoVbo;
-//    glGenBuffers(1, &instInfoVbo);
-//    glBindBuffer(GL_ARRAY_BUFFER, instInfoVbo);
-//    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), &vertexData[0], GL_STATIC_DRAW);
-//    glEnableVertexAttribArray(1);
-//    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
-//    glVertexAttribDivisor(1, 1);
-//    glEnableVertexAttribArray(2);
-//    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*) (4 * sizeof(float)));
-//    glVertexAttribDivisor(2, 1);
-
-    InstancedRenderer::Init();
+    // INSTANCED QUAD RENDERING
+//    InstancedRenderer::Init();
 //    auto* q1 = InstancedRenderer::AllocateQuad();
 //    auto* q2 = InstancedRenderer::AllocateQuad();
-
-    InstancedQuadRenderer::PreUpdate();
-
-    for (int i = 0; i < 300000; i++) {
-        auto* q = InstancedRenderer::AllocateQuad();
-        q->translate(((float) std::rand() / (float) RAND_MAX) * 1000, ((float) std::rand() / (float) RAND_MAX) * 1000, -0.1);
-        q->setColour(RGB((float) std::rand() / (float) RAND_MAX, (float) std::rand() / (float) RAND_MAX, (float) std::rand() / (float) RAND_MAX));
-        q->setScale(100, 100);
-        q->update();
-    }
-
-//    q1->translate(0.5, 0, -0.1);
+//    auto* q3 = InstancedRenderer::AllocateQuad();
+//
+//    InstancedQuadRenderer::PreUpdate();
+//
+//    q1->translate(0.5, 0, -1);
 //    q1->setColour(RGB(0.3, 0.7, 0.2));
 //    q1->setScale(2000, 1000);
 //    q1->update();
@@ -260,8 +274,190 @@ int main() {
 //    q2->setColour(RGB(0.2, 0.3, 0.7));
 //    q2->setScale(1000, 1000);
 //    q2->update();
+//
+//    float q3x = 500;
+//    q3->translate(q3x, 0, 1);
+//    q3->setColour(RGB(0.9, 0.1, 0.5));
+//    q3->setScale(500, 500);
+//    q3->update();
+//
+//    InstancedQuadRenderer::PostUpdate();
 
-    InstancedQuadRenderer::PostUpdate();
+    // FONT TESTING
+    Shader fontShader("../resources/shader/instanced/font.vert", "../resources/shader/instanced/font.frag");
+    auto *fontVao = new VertexArray();
+
+    float vertices[] = {
+            0.0f, 0.0f,
+            0.0f, 1.0f,
+            1.0f, 1.0f,
+
+            0.0f, 0.0f,
+            1.0f, 1.0f,
+            1.0f, 0.0f,
+    };
+    auto *vertBuffer = new VertexBuffer(2);
+    vertBuffer->setData(vertices, sizeof(vertices));
+    fontVao->addVertexBuffer(vertBuffer);
+
+    float data[] = {
+            1000.0, 1000.0,
+            1000.0, 1000.0,
+            1000.0, 1000.0,
+
+            1000.0, 1000.0,
+            1000.0, 1000.0,
+            1000.0, 1000.0,
+    };
+    auto *dataBuffer = new VertexBuffer();
+    dataBuffer->setData(data, sizeof(data));
+    fontVao->addVertexBuffer(dataBuffer);
+
+//    FT_Library ft;
+//    // All functions return a value different than 0 whenever an error occurred
+//    if (FT_Init_FreeType(&ft)) {
+//        throw std::runtime_error("ERROR::FREETYPE: Could not init FreeType Library");
+//    }
+//
+//    // load font as face
+//    FT_Face face;
+//    if (FT_New_Face(ft, "../resources/font/ubuntu.ttf", 0, &face)) {
+//        throw std::runtime_error("ERROR::FREETYPE: Failed to load font");
+//    }
+//
+//    FT_Set_Pixel_Sizes(face, 0, 96);
+////    FT_Set_Char_Size(face, 0, 50, 96, 96);
+//
+//    unsigned int atlasWidth = 0;
+//    unsigned int atlasHeight = 0;
+//
+//    for (int i = 32; i < 128; i++) {
+//        if (FT_Load_Char(face, i, FT_LOAD_RENDER)) {
+//            std::cout << "Failed to load character " << (char) i << "." << std::endl;
+//            continue;
+//        }
+//
+//        atlasWidth += face->glyph->bitmap.width;
+//        atlasHeight = std::max(atlasHeight, face->glyph->bitmap.rows);
+//    }
+//
+//    unsigned int ubuntuAtlasId;
+//    glEnable(GL_TEXTURE_2D);
+//    glActiveTexture(GL_TEXTURE0);
+//    glGenTextures(1, &ubuntuAtlasId);
+//    glBindTexture(GL_TEXTURE_2D, ubuntuAtlasId);
+//    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//
+//    unsigned int w = 0;
+//    unsigned int h = 0;
+//
+//    for(int i = 32; i < 128; i++) {
+//        if(FT_Load_Char(face, i, FT_LOAD_RENDER)) {
+//            fprintf(stderr, "Loading character %c failed!\n", i);
+//            continue;
+//        }
+//
+//        w += face->glyph->bitmap.width;
+//        h = std::max(h, face->glyph->bitmap.rows);
+//    }
+//
+//    // Setup texture
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//
+//    unsigned int x = 0;
+//    for(int i = 32; i < 128; i++) {
+//        if(FT_Load_Char(face, i, FT_LOAD_RENDER))
+//            continue;
+//
+//        glTexSubImage2D(GL_TEXTURE_2D, 0, x, 0, face->glyph->bitmap.width, face->glyph->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+//
+//        x += face->glyph->bitmap.width;
+//    }
+
+    FT_Library ft;
+    FT_Face face;
+    if (FT_Init_FreeType(&ft))
+        throw std::runtime_error("ERROR::FREETYPE: Could not init FreeType Library");
+    if (FT_New_Face(ft, "../resources/font/ubuntu.ttf", 0, &face))
+        throw std::runtime_error("ERROR::FREETYPE: Failed to load font");
+
+    FT_Set_Pixel_Sizes(face, 0, 96);
+
+    unsigned int area = 0;
+    std::vector<std::pair<int, int>> ids;
+    for (int i = 32; i < 127; i++) {
+        if (FT_Load_Char(face, i, FT_LOAD_RENDER)) {
+            std::cout << "Failed to load character " << (char) i << "." << std::endl;
+            continue;
+        }
+
+        unsigned int a = (face->glyph->bitmap.width * face->glyph->bitmap.rows);
+//        std::pair<int, int> id(i, (int) a);  // area
+        std::pair<int, int> id(i, (int) face->glyph->bitmap.width);  // width
+//        std::pair<int, int> id(i, face->glyph->bitmap.rows);  // height
+        ids.push_back(id);
+        area += a;
+    }
+
+    std::sort(ids.begin(), ids.end(), sortIds);
+
+    int atlasWidth = std::sqrt(area);
+    atlasWidth *= 1.06;
+    int atlasHeight = atlasWidth;
+
+    unsigned int ubuntuAtlasId;
+    glEnable(GL_TEXTURE_2D);
+    glActiveTexture(GL_TEXTURE0);
+    glGenTextures(1, &ubuntuAtlasId);
+    glBindTexture(GL_TEXTURE_2D, ubuntuAtlasId);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    // Setup texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, atlasWidth, atlasHeight, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Draw characters
+    freeRectangles.push_back({0, 0, atlasWidth, atlasHeight});
+
+//    int i = 32;
+
+    for (auto p : ids) {
+        std::cout << p.first << std::endl;
+        if (FT_Load_Char(face, p.first, FT_LOAD_RENDER))
+            continue;
+
+        int gw = (int) face->glyph->bitmap.width;
+        int gh = (int) face->glyph->bitmap.rows;
+
+        int bestFit = findBestCut(gw, gh);
+        if (bestFit == -1)
+            throw std::runtime_error("Cannot pack texture in the given size!");
+
+        auto r = freeRectangles[bestFit];
+        freeRectangles.erase(freeRectangles.begin() + bestFit);
+        auto[sm, lg] = insert(r, gw, gh);
+        freeRectangles.push_back(sm);
+        freeRectangles.push_back(lg);
+
+        std::vector<unsigned char> idata;
+        idata.reserve(gw * gh);
+        for (int j = 0; j < gw * gh; j++)
+            idata.push_back(255);
+
+        glTexSubImage2D(GL_TEXTURE_2D, 0, r.x, r.y, gw, gh, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+//        glTexSubImage2D(GL_TEXTURE_2D, 0, r.x, r.y, gw, gh, GL_RED, GL_UNSIGNED_BYTE, &idata[0]);
+    }
+
+//    for (int i = 32; i < 128; i++) {
+//
+//    }
 
     while (!window->shouldClose()) {
         auto now_time = std::chrono::steady_clock::now();
@@ -273,10 +469,59 @@ int main() {
         glClearColor(0.19f, 0.19f, 0.19f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-//        instShader->use();
-//        instShader->setMat4("projection_view", editor->getViewport()->getProjectionViewMatrix());
-        InstancedRenderer::Render(editor->getViewport()->getProjectionViewMatrix());
-//        glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, quads);
+//        InstancedRenderer::Render(editor->getViewport()->getProjectionViewMatrix());
+
+
+
+        // Draw glyphs to atlas
+//        char* pixel
+
+
+////        FT_Set_Pixel_Sizes(face, 0, 100);
+//
+//        unsigned int atlasWidth = 0;
+//        unsigned int atlasHeight = 0;
+//
+//        for (int i = 32; i < 128; i++) {
+//            if (FT_Load_Char(face, i, FT_LOAD_RENDER)) {
+//                std::cout << "Failed to load character " << (char) i << "." << std::endl;
+//                continue;
+//            }
+//
+//            atlasWidth += face->glyph->bitmap.width;
+//            atlasHeight = std::max(atlasHeight, face->glyph->bitmap.rows);
+//        }
+//
+
+//        // Create empty texture
+//        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, atlasWidth, atlasHeight, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+//
+//        // Fill texture with glyphs
+//        unsigned int x = 0;
+//        for (int i = 32; i < 128; i++) {
+//            if (FT_Load_Char(face, i, FT_LOAD_RENDER))
+//                continue;
+//
+//            glTexSubImage2D(GL_TEXTURE_2D, 0, x, 0, face->glyph->bitmap.width, face->glyph->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+//
+//            x += face->glyph->bitmap.width;
+//        }
+
+
+
+//        auto *font = FontHelper::GetFont("ubuntu");
+//        auto it = font->find('a');
+//        FTChar c = it->second;
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, ubuntuAtlasId);
+
+        fontShader.use();
+        fontShader.setMat4("projection_view", editor->getViewport()->getProjectionViewMatrix());
+        fontShader.setInt("font_tex", 0);
+
+        fontVao->bind();
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 6);
 
         // Rendering Setup
 //        glm::mat4 view = glm::mat4(1.0f);
@@ -317,34 +562,48 @@ int main() {
             if (ImGui::Button("Open Demo Window"))
                 demoWindowOpen = true;
 
+//            if (ImGui::SliderFloat("Q3 X Position", &q3x, 0.0, 1000.0)) {
+//                InstancedQuadRenderer::PreUpdate();
+//                q3->translate(q3x, 0, 1);
+//                InstancedQuadRenderer::PostUpdate();
+//            }
+
             ImGui::End();
         }
 
-//        {
-//            ImGui::Begin("Test Window", nullptr,ImGuiWindowFlags_DockNodeHost);
-//
-//            ImGui::Text("ImGui Test");
-//            ImGui::ColorEdit4("Outer BG Color", glm::value_ptr(outerHboxColor));
-//
-//            ImGui::End();
-//        }
-//
-//        {
-//            ImGui::Begin("DT Window 1");
-//
-//            ImGui::TextUnformatted("Docking Test 1");
-//
-//            ImGui::End();
-//        }
-//
-//        {
-//            ImGui::Begin("DT Window 2");
-//
-//            ImGui::TextUnformatted("Docking Test 2");
-//
-//            ImGui::End();
-//        }
+        {
+            ImGui::Begin("Font Texture Atlas");
+            ImGui::Image((void *) (GLuint) ubuntuAtlasId, ImVec2((float) atlasWidth, (float) atlasHeight));
 
+            if (ImGui::Button("Next Character")) {
+//                if (FT_Load_Char(face, i, FT_LOAD_RENDER))
+//                    continue;
+//
+//                int gw = (int) face->glyph->bitmap.width;
+//                int gh = (int) face->glyph->bitmap.rows;
+//
+//                int bestFit = findBestCut(gw, gh);
+//                if (bestFit == -1)
+//                    throw std::runtime_error("Cannot pack texture in the given size!");
+//
+//                auto r = freeRectangles[bestFit];
+//                freeRectangles.erase(freeRectangles.begin() + bestFit);
+//                auto[sm, lg] = insert(r, gw, gh);
+//                freeRectangles.push_back(sm);
+//                freeRectangles.push_back(lg);
+//
+//                std::vector<unsigned char> idata;
+//                idata.reserve(gw * gh);
+//                for (int j = 0; j < gw * gh; j++)
+//                    idata.push_back(255);
+//
+////                glTexSubImage2D(GL_TEXTURE_2D, 0, r.x, r.y, gw, gh, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+//                glTexSubImage2D(GL_TEXTURE_2D, 0, r.x, r.y, gw, gh, GL_RED, GL_UNSIGNED_BYTE, &idata[0]);
+//
+//                i++;
+            }
+            ImGui::End();
+        }
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
