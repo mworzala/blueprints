@@ -8,7 +8,7 @@ void OnGlfwError(int code, const char* error) {
     std::cerr << "GLFW_ERR_" << code << " << " << error << std::endl;
 }
 
-Window::Window(const char* title, int initial_width, int initial_height)
+Window::Window(const char* title, int initial_width, int initial_height, float scaleFactor)
     : m_width(static_cast<float>(initial_width)), m_height(static_cast<float>(initial_height)) {
     // Init GLFW todo move this to a static place so it isnt called when making more windows.
     glfwInit();
@@ -61,6 +61,7 @@ Window::Window(const char* title, int initial_width, int initial_height)
         static_cast<Window*>(glfwGetWindowUserPointer(window))->
             onMouseScroll(static_cast<float>(dx), static_cast<float>(dy));
     });
+
 }
 
 Window::~Window() {

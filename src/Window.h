@@ -17,7 +17,7 @@ private:
     float m_lastMouseX{}, m_lastMouseY{};
 
 public:
-    Window(const char* title, int initial_width, int initial_height);
+    Window(const char* title, int initial_width, int initial_height, float scaleFactor);
     ~Window();
 
     float getWidth() const;
